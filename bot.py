@@ -34,6 +34,7 @@ class SelfBot(commands.Bot):
             'cogs.joinlog',
             'cogs.meta',
             'cogs.mod',
+            'cogs.playground',
         ]
 
     async def on_ready(self):
