@@ -1,7 +1,6 @@
 import datetime
 import logging
 import os
-import traceback
 
 import discord
 from discord.ext import commands
@@ -46,11 +45,6 @@ class SelfBot(commands.Bot):
         if not self.uptime:
             self.uptime = datetime.datetime.utcnow()
 
-    async def on_command_error(self, exception, context):
-        log.error(f'Command error in {context.command}:')
-        traceback.print_tb(exception.original.__traceback__)
-        log.error('{0.__class__.__name__}: {0}'.format(exception.original))
-
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):
             destination = 'Private Message'
@@ -69,8 +63,8 @@ if __name__ == '__main__':
     for extension in bot.initial_extensions:
         try:
             bot.load_extension(extension)
-        except Exception as e:
-            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+        except Exception as e:  # noqa
+            print(f'Failed to load extension {extension}\n{type(e).__name__}: {e}')
 
     bot.run(os.environ['TOKEN'])
 
