@@ -4,13 +4,16 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-log = logging.getLogger('rust_bot')
+log = logging.getLogger(__name__)
 
 
 class JoinLog:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.join_channel = self.bot.get_channel(id='278360426213933056')
+        self.modjoin_channel_id = 278360426213933056
+
+    def modjoin_channel(self, guild: discord.Guild):
+        return guild.get_channel(channel_id=self.modjoin_channel_id)
 
     async def on_member_join(self, member: discord.Member):
 
@@ -19,7 +22,7 @@ class JoinLog:
         embed.add_field(name='Created at', value=member.created_at)
         embed.timestamp = datetime.utcnow()
 
-        await self.send_message(embed)
+        await self.send_message(member.guild, embed)
 
     async def on_member_remove(self, member: discord.Member):
 
@@ -27,11 +30,11 @@ class JoinLog:
         embed.add_field(name='ID', value=member.id)
         embed.timestamp = datetime.utcnow()
 
-        await self.send_message(embed)
+        await self.send_message(member.guild, embed)
 
-    async def send_message(self, embed: discord.Embed):
+    async def send_message(self, guild: discord.Guild, embed: discord.Embed):
         try:
-            await self.bot.send_message(self.join_channel, embed=embed)
+            await self.modjoin_channel(guild).send(embed=embed)
         except discord.Forbidden as e:
             log.exception('No permissions to send message!')
             log.exception('Exception: {}'.format(e))

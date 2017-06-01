@@ -3,7 +3,7 @@ from discord.ext import commands
 
 
 def is_owner_check(message):
-    return message.author.id == '129819557115199488'
+    return message.author.id == 129819557115199488
 
 
 def is_owner():
@@ -25,9 +25,9 @@ def role_or_permissions(ctx, check, **perms):
     if check_permissions(ctx, perms):
         return True
 
-    ch = ctx.message.channel
-    author = ctx.message.author
-    if ch.is_private:
+    ch = ctx.channel
+    author = ctx.author
+    if isinstance(ch, discord.DMChannel):
         return False  # can't have roles in PMs
 
     role = discord.utils.find(check, author.roles)
@@ -44,15 +44,5 @@ def mod_or_permissions(**perms):
 def admin_or_permissions(**perms):
     def predicate(ctx):
         return role_or_permissions(ctx, lambda r: r.name == 'Bot Admin', **perms)
-
-    return commands.check(predicate)
-
-
-def is_in_servers(*server_ids):
-    def predicate(ctx):
-        server = ctx.message.server
-        if server is None:
-            return False
-        return server.id in server_ids
 
     return commands.check(predicate)

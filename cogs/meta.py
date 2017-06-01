@@ -1,18 +1,14 @@
 import asyncio
-import copy
 import datetime
 import re
-from collections import Counter
 
 import discord
 from discord.ext import commands
 
-from utils import checks, formats
-
 
 class TimeParser:
     def __init__(self, argument):
-        compiled = re.compile(r"(?:(?P<hours>\d+)h)?(?:(?P<minutes>\d+)m)?(?:(?P<seconds>\d+)s)?")
+        compiled = re.compile(r'(?:(?P<hours>\d+)h)?(?:(?P<minutes>\d+)m)?(?:(?P<seconds>\d+)s)?')
         self.original = argument
         try:
             self.seconds = int(argument)
@@ -44,10 +40,8 @@ class Meta:
         self.bot = bot
 
     @commands.command()
-    async def uptime(self):
-        """Tells you how long the bot has been up for.
-
-        """
+    async def uptime(self, ctx: commands.Context):
+        """Tells you how long the bot has been up for"""
 
         now = datetime.datetime.utcnow()
         delta = now - self.bot.uptime
@@ -59,10 +53,10 @@ class Meta:
         if days:
             fmt = '{d}d ' + fmt
 
-        await self.bot.say(f'Uptime: **{fmt.format(d=days, h=hours, m=minutes, s=seconds)}**')
+        await ctx.send(content='Uptime: **{}**'.format(fmt.format(d=days, h=hours, m=minutes, s=seconds)))
 
-    @commands.command(pass_context=True, aliases=['reminder', 'remind'])
-    async def timer(self, ctx: commands.context.Context, time: TimeParser, *, message=''):
+    @commands.command(aliases=['reminder', 'remind'])
+    async def timer(self, ctx: commands.Context, time: TimeParser, *, message=''):
         """Reminds you of something after a certain amount of time.
         The time can optionally be specified with units such as 'h'
         for hours, 'm' for minutes and 's' for seconds. If no unit
@@ -80,41 +74,33 @@ class Meta:
             reminder = 'Okay {0.mention}, I\'ll remind you about "{2}" in {1.seconds} seconds.'
             completed = 'Time is up {0.mention}! You asked to be reminded about "{1}".'
 
-        await self.bot.say(reminder.format(author, time, message))
+        await ctx.send(reminder.format(author, time, message))
         await asyncio.sleep(time.seconds)
-        await self.bot.say(completed.format(author, message))
+        await ctx.send(completed.format(author, message))
 
     @timer.error
     async def timer_error(self, error, ctx: commands.context.Context):
         if type(error) is commands.BadArgument:
-            await self.bot.say(str(error))
+            await ctx.send(str(error))
 
-    @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    async def info(self, ctx, *, member: discord.Member = None):
+    @commands.command(no_pm=True)
+    async def info(self, ctx: commands.Context, *, member: discord.Member = None):
         """Shows info about a member.
         This cannot be used in private messages. If you don't specify
         a member then the info returned will be yours.
         """
-        channel = ctx.message.channel
+        channel = ctx.channel
         if member is None:
-            member = ctx.message.author
+            member = ctx.author
 
         e = discord.Embed()
+
         roles = [role.name.replace('@', '@\u200b') for role in member.roles]
-        shared = sum(1 for m in self.bot.get_all_members() if m.id == member.id)
-        voice = member.voice_channel
-        if voice is not None:
-            other_people = len(voice.voice_members) - 1
-            voice_fmt = '{} with {} others' if other_people else '{} by themselves'
-            voice = voice_fmt.format(voice.name, other_people)
-        else:
-            voice = 'Not connected.'
 
         e.set_author(name=str(member), icon_url=member.avatar_url or member.default_avatar_url)
         e.set_footer(text='Member since').timestamp = member.joined_at
         e.add_field(name='ID', value=member.id)
-        e.add_field(name='Servers', value='%s shared' % shared)
-        e.add_field(name='Voice', value=voice)
+        e.add_field(name='Current Name', value=member.display_name)
         e.add_field(name='Created', value=member.created_at)
         e.add_field(name='Roles', value=', '.join(roles))
         e.colour = member.colour
@@ -122,88 +108,7 @@ class Meta:
         if member.avatar:
             e.set_image(url=member.avatar_url)
 
-        await self.bot.say(embed=e)
-
-    @info.command(name='server', pass_context=True, no_pm=True)
-    async def server_info(self, ctx: commands.context.Context):
-        server = ctx.message.server
-        roles = [role.name.replace('@', '@\u200b') for role in server.roles]
-
-        secret_member = copy.copy(server.me)
-        secret_member.id = '0'
-        secret_member.roles = [server.default_role]
-
-        # figure out what channels are 'secret'
-        secret_channels = 0
-        secret_voice = 0
-        text_channels = 0
-        for channel in server.channels:
-            perms = channel.permissions_for(secret_member)
-            is_text = channel.type == discord.ChannelType.text
-            text_channels += is_text
-            if is_text and not perms.read_messages:
-                secret_channels += 1
-            elif not is_text and (not perms.connect or not perms.speak):
-                secret_voice += 1
-
-        regular_channels = len(server.channels) - secret_channels
-        voice_channels = len(server.channels) - text_channels
-        member_by_status = Counter(str(m.status) for m in server.members)
-
-        e = discord.Embed()
-        e.title = 'Info for ' + server.name
-        e.add_field(name='ID', value=server.id)
-        e.add_field(name='Owner', value=server.owner)
-        if server.icon:
-            e.set_thumbnail(url=server.icon_url)
-
-        if server.splash:
-            e.set_image(url=server.splash_url)
-
-        e.add_field(name='Partnered?', value='Yes' if server.features else 'No')
-
-        fmt = 'Text %s (%s secret)\nVoice %s (%s locked)'
-        e.add_field(name='Channels', value=fmt % (text_channels, secret_channels, voice_channels, secret_voice))
-
-        fmt = 'Total: {0}\nOnline: {1[online]}' \
-              ', Offline: {1[offline]}' \
-              '\nDnD: {1[dnd]}' \
-              ', Idle: {1[idle]}'
-
-        e.add_field(name='Members', value=fmt.format(server.member_count, member_by_status))
-        e.add_field(name='Roles', value=', '.join(roles) if len(roles) < 10 else '%s roles' % len(roles))
-        e.set_footer(text='Created').timestamp = server.created_at
-        await self.bot.say(embed=e)
-
-    async def say_permissions(self, member, channel):
-        permissions = channel.permissions_for(member)
-        entries = [(attr.replace('_', ' ').title(), val) for attr, val in permissions]
-        await formats.entry_to_code(self.bot, entries)
-
-    @commands.command(pass_context=True, no_pm=True)
-    async def permissions(self, ctx: commands.context.Context, *, member: discord.Member = None):
-        """Shows a member's permissions.
-        You cannot use this in private messages. If no member is given then
-        the info returned will be yours.
-        """
-        channel = ctx.message.channel
-        if member is None:
-            member = ctx.message.author
-
-        await self.say_permissions(member, channel)
-
-    @commands.command(pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(manage_roles=True)
-    async def botpermissions(self, ctx: commands.context.Context):
-        """Shows the bot's permissions.
-        This is a good way of checking if the bot has the permissions needed
-        to execute the commands it wants to execute.
-        To execute this command you must have Manage Roles permissions or
-        have the Bot Admin role. You cannot use this in private messages.
-        """
-        channel = ctx.message.channel
-        member = ctx.message.server.me
-        await self.say_permissions(member, channel)
+        await ctx.send(embed=e)
 
 
 def setup(bot):

@@ -1,77 +1,78 @@
 import datetime
 import logging
+import os
 import traceback
 
 import discord
 from discord.ext import commands
 
-import utils
 
-description = """
-Hello! I am a bot written by MelodicStream#1336 to manage the Rust server!
-"""
+def setup_logger():
+    handler = logging.FileHandler(filename='logging.log', encoding='utf-8', mode='w')
+
+    formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] %(module)s - %(message)s')
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    return logger
+
 
 discord_logger = logging.getLogger('discord')
-discord_logger.setLevel(logging.CRITICAL)
-
-log = utils.setup_logger('rust_bot')
-
-help_attrs = dict(hidden=True)
-
-bot = commands.Bot(command_prefix=['!', '?'], description=description, pm_help=True, help_attrs=help_attrs)
+discord_logger.setLevel(logging.INFO)
+log = setup_logger()
 
 
-@bot.event
-async def on_command_error(error, ctx):
-    if isinstance(error, commands.NoPrivateMessage):
-        await bot.send_message(ctx.message.author, 'This command cannot be used in private messages.')
-    elif isinstance(error, commands.DisabledCommand):
-        await bot.send_message(ctx.message.author, 'Sorry. This command is disabled and cannot be used.')
-    elif isinstance(error, commands.CommandInvokeError):
-        log.error('Command error')
-        log.error('In {0.command.qualified_name}:'.format(ctx))
-        traceback.print_tb(error.original.__traceback__)
-        log.error('{0.__class__.__name__}: {0}'.format(error.original))
+class SelfBot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
+        self.uptime = None
 
-@bot.event
-async def on_ready():
-    print('Logged in as:')
-    print('Username: ' + bot.user.name)
-    print('ID: ' + bot.user.id)
-    print('------')
-    print('DON\'T FORGET TO RUN ?reload')
-    if not hasattr(bot, 'uptime'):
-        bot.uptime = datetime.datetime.utcnow()
+        self.initial_extensions = [
+            'cogs.admin',
+            'cogs.joinlog',
+            'cogs.meta',
+            'cogs.mod',
+        ]
 
-    await bot.change_presence(game=discord.Game(name='?help'))
+    async def on_ready(self):
+        print('Logged in as')
+        print(self.user.name)
+        print(self.user.id)
+        print('------')
 
+        if not self.uptime:
+            self.uptime = datetime.datetime.utcnow()
 
-@bot.event
-async def on_command(command, ctx):
-    message = ctx.message
-    if message.channel.is_private:
-        destination = 'Private Message'
-    else:
-        destination = '#{0.channel.name}'.format(message)
+    async def on_command_error(self, exception, context):
+        log.error(f'Command error in {context.command}:')
+        traceback.print_tb(exception.original.__traceback__)
+        log.error('{0.__class__.__name__}: {0}'.format(exception.original))
 
-    log.info('{0.author.name} in {1}: {0.content}'.format(message, destination))
+    async def on_command(self, ctx):
+        if isinstance(ctx.channel, discord.abc.PrivateChannel):
+            destination = 'Private Message'
+        else:
+            destination = f'#{ctx.channel.name} ({ctx.guild.name})'
 
-
-@bot.event
-async def on_message(message: discord.Message):
-    if message.author.bot:
-        return
-
-    await bot.process_commands(message)
+        log.info(f'{destination}: {ctx.message.content}')
 
 
 if __name__ == '__main__':
-    token = utils.load_credentials()['token']
 
-    bot.load_extension('cogs.admin')
+    bot = SelfBot(
+        command_prefix=['!', '?'],
+    )
 
-    bot.run(token)
+    for extension in bot.initial_extensions:
+        try:
+            bot.load_extension(extension)
+        except Exception as e:
+            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+
+    bot.run(os.environ['TOKEN'])
 
     handlers = log.handlers[:]
     for hdlr in handlers:
