@@ -47,12 +47,7 @@ class Playground:
                 await ctx.message.add_reaction('❌')
                 return
 
-            msg = '\n'.join([
-                '**Standard Error**\n',
-                f"```rs\n{response['stderr']}\n```",
-                '**Standard Output**\n',
-                f"```rs\n{response['stdout']}\n```",
-            ])
+            msg = f"```rs\n{response['stderr']}\n{response['stdout']}\n```"
 
             await ctx.message.add_reaction('👌')
             await ctx.send(msg)
