@@ -33,6 +33,7 @@ class Playground:
     ```
 
     """
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
@@ -64,13 +65,39 @@ class Playground:
 
         msg = f"```rs\n{response['stderr']}{response['stdout']}\n```"
 
+        if len(msg) > 2000:
+            msg = await self.get_gist(msg)
+
         await ctx.send(msg)
+
+    async def get_gist(self, msg):
+        data = json.dumps({
+            'public': True,
+            'files': {
+                'main.rs': {
+                    'content': msg,
+                },
+            },
+        })
+
+        headers = {
+            'Accept': 'application/vnd.github.v3+json',
+        }
+
+        async with self.session.post('https://api.github.com/gists', data=data, headers=headers) as r:
+            if r.status != 200:
+                return 'Error uploading the gist!'
+            response = await r.json()
+
+        return response['url']
 
     @play.error
     async def play_error(self, ctx: commands.Context, error):
         if isinstance(error, (discord.HTTPException, discord.Forbidden)):
             await ctx.send('Error while sending the output.')
-        elif isinstance(error, commands.CommandError):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(CodeBlock.missing_error)
+        if isinstance(error, commands.CommandError):
             await ctx.send(str(error))
         await ctx.message.add_reaction('❌')
 
