@@ -1,7 +1,6 @@
 import logging
 
 import discord
-from discord import Color
 from discord.ext import commands
 
 from .utils import checks

@@ -42,15 +42,14 @@ class Playground:
         async with self.client_session.post('http://play.integer32.com/execute', data=payload) as r:
             response = await r.json()
 
-            if 'error' in response:
-                log.error(f'Playground error: {response["error"]}')
-                await ctx.message.add_reaction('❌')
-                return
+        if 'error' in response:
+            log.error(f'Playground error: {response["error"]}')
+            return await ctx.message.add_reaction('❌')
 
-            msg = f"```rs\n{response['stderr']}\n{response['stdout']}\n```"
+        msg = f"```rs\n{response['stderr']}{response['stdout']}\n```"
 
-            await ctx.message.add_reaction('👌')
-            await ctx.send(msg)
+        await ctx.message.add_reaction('👌')
+        await ctx.send(msg)
 
 
 def setup(bot):
