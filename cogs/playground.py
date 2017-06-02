@@ -67,7 +67,7 @@ class Playground:
         await ctx.send(msg)
 
     @play.error
-    async def play_error(self, error, ctx: commands.Context):
+    async def play_error(self, ctx: commands.Context, error):
         if isinstance(error, (discord.HTTPException, discord.Forbidden)):
             await ctx.send('Error while sending the output.')
         elif isinstance(error, commands.CommandError):
