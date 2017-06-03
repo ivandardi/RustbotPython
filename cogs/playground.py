@@ -55,20 +55,17 @@ class Playground:
 
         async with self.session.post('http://play.integer32.com/execute', data=payload) as r:
             if r.status != 200:
-                raise commands.CommandError("Rust i32 Playgrond didn't respond in time.")
+                raise commands.CommandError("Rust i32 Playground didn't respond in time.")
+
             response = await r.json()
+            if 'error' in response:
+                raise commands.CommandError(response['error'])
 
-        if 'error' in response:
-            error = response['error']
-            log.error(f'Playground error: {error}')
-            raise commands.CommandError(error)
+            msg = response['stderr'] + response['stdout']
+            if len(msg) > 2000:
+                msg = await self.get_gist(msg)
 
-        msg = f"```rs\n{response['stderr']}{response['stdout']}\n```"
-
-        if len(msg) > 2000:
-            msg = await self.get_gist(msg)
-
-        await ctx.send(msg)
+        await ctx.send(f'```rs\n{msg}```')
 
     async def get_gist(self, msg):
         data = json.dumps({
@@ -91,6 +88,7 @@ class Playground:
 
     @play.error
     async def play_error(self, ctx: commands.Context, error):
+        log.error(f'Playground error: {error}')
         if isinstance(error, (discord.HTTPException, discord.Forbidden)):
             await ctx.send('Error while sending the output.')
         if isinstance(error, commands.MissingRequiredArgument):
