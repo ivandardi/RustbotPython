@@ -87,7 +87,7 @@ class Playground:
         async with self.session.post('https://api.github.com/gists', data=data, headers=headers) as r:
             response = await r.json()
 
-        return response['url']
+        return 'https://gist.github.com/anonymous/' + response['id']
 
     @play.error
     async def play_error(self, ctx: commands.Context, error):
