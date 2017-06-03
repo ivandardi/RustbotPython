@@ -85,8 +85,6 @@ class Playground:
         }
 
         async with self.session.post('https://api.github.com/gists', data=data, headers=headers) as r:
-            if r.status != 200:
-                return 'Error uploading the gist!'
             response = await r.json()
 
         return response['url']
