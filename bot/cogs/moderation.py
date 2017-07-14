@@ -3,8 +3,6 @@ import logging
 import discord
 from discord.ext import commands
 
-from .utils import checks
-
 log = logging.getLogger(__name__)
 
 
@@ -15,18 +13,45 @@ class ModerationAction:
         self.member = member
 
 
-class Mod:
+class Moderation:
     """Moderation related commands."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.modlog_channel_id = 274214329073795074
+        self._modlog_channel = None
 
-    def modlog_channel(self, ctx: commands.Context):
-        return ctx.guild.get_channel(self.modlog_channel_id)
+    @property
+    def modlog_channel(self):
+        return self._modlog_channel
 
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(kick_members=True)
+    async def __error(self, ctx: commands.Context, error):
+        await ctx.message.add_reaction('❌')
+
+        if isinstance(error, discord.Forbidden):
+            await ctx.send(f'The bot does not have permissions to do that! {error}')
+        if isinstance(error, discord.HTTPException):
+            await ctx.send(f'It failed! {error}')
+
+    async def __before_invoke(self, ctx: commands.Context):
+        if self._modlog_channel:
+            return
+
+        self._modlog_channel = self.bot.get_channel(id=274214329073795074)
+        if not self._modlog_channel:
+            raise RuntimeError("Couldn't find modlog channel!")
+
+    async def __after_invoke(self, ctx: commands.Context):
+        await ctx.message.add_reaction('👌')
+
+        action = ctx.action
+        msg = await self.make_modlog_entry(ctx, action)
+        await self.modlog_channel.send(msg)
+
+    async def __local_check(self, ctx: commands.Context):
+        return any(role.name in ('Admin', 'Moderator', 'Bot Admin') for role in ctx.author.roles)
+
+    @commands.command()
+    @commands.guild_only()
     async def kick(self, ctx: commands.Context, member: discord.Member, *, reason: str):
         """Kicks a member from the server.
 
@@ -44,8 +69,8 @@ class Mod:
 
         await member.kick(reason=reason)
 
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(ban_members=True)
+    @commands.command()
+    @commands.guild_only()
     async def ban(self, ctx: commands.Context, member: discord.Member, *, reason: str):
         """Bans a member from the server.
 
@@ -61,10 +86,10 @@ class Mod:
             member=member,
         )
 
-        await member.ban(reason=reason)
+        await member.ban(reason=reason, delete_message_days=0)
 
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(ban_members=True)
+    @commands.command()
+    @commands.guild_only()
     async def softban(self, ctx: commands.Context, member: discord.Member, *, reason: str):
         """Soft bans a member from the server.
 
@@ -82,34 +107,31 @@ class Mod:
             member=member,
         )
 
-        await member.ban(reason=reason)
+        await member.ban(reason=reason, delete_message_days=0)
         await member.unban(reason=reason)
 
-    @ban.error
-    @kick.error
-    @softban.error
-    async def mod_error(self, error, ctx: commands.Context):
-        await ctx.message.add_reaction('❌')
+    @commands.command()
+    @commands.guild_only()
+    async def warn(self, ctx: commands.Context, member: discord.Member, *, reason: str):
+        """Warns a member."""
 
-        action = ctx.action
-        if isinstance(error, discord.Forbidden):
-            return await ctx.send(f'The bot does not have permissions to {action.name} members.')
-        if isinstance(error, discord.HTTPException):
-            return await ctx.send(f'{action.name} failed.')
+        ctx.action = ModerationAction(
+            name='Warn',
+            reason=reason,
+            member=member,
+        )
 
-    @ban.after_invoke
-    @kick.after_invoke
-    @softban.after_invoke
-    async def add_to_modlog(self, ctx: commands.Context):
-        await ctx.message.add_reaction('👌')
+    @commands.command()
+    @commands.guild_only()
+    async def purge(self, ctx: commands.Context, limit=100):
+        """Deletes up to 100 messages in the current channel."""
 
-        action = ctx.action
-        msg = await self.make_modlog_entry(ctx, action)
-        await self.modlog_channel(ctx).send(msg)
+        deleted = await ctx.channel.purge(limit=limit)
+        await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
     async def make_modlog_entry(self, ctx: commands.Context, action: ModerationAction):
 
-        async for m in self.modlog_channel(ctx).history(limit=1):
+        async for m in self.modlog_channel.history(limit=1):
             action_id = int(next(iter(m.content.split()))) + 1
 
         msg = '\n\n'.join([
@@ -122,14 +144,6 @@ class Mod:
 
         return msg
 
-    @commands.command(no_pm=True, aliases=['prune', 'remove'])
-    @checks.admin_or_permissions(manage_messages=True)
-    async def purge(self, ctx: commands.Context, limit=100):
-        """Deletes up to 100 messages in the current channel."""
-
-        deleted = await ctx.channel.purge(limit=limit)
-        await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
-
 
 def setup(bot):
-    bot.add_cog(Mod(bot))
+    bot.add_cog(Moderation(bot))

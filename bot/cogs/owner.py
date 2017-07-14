@@ -1,29 +1,27 @@
 import discord
 from discord.ext import commands
 
-from .utils import checks
 
-
-class Admin:
+class Owner:
     """Admin-only commands that make the bot dynamic."""
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    @checks.is_owner()
+    @commands.is_owner()
     async def close(self, ctx: commands.Context):
         """Closes the bot safely. Can only be used by the owner."""
         await self.bot.logout()
 
     @commands.command()
-    @checks.is_owner()
+    @commands.is_owner()
     async def status(self, ctx: commands.Context, *, status: str):
         """Changes the bot's status. Can only be used by the owner."""
         await self.bot.change_presence(game=discord.Game(name=status))
 
     @commands.command(name='reload')
-    @checks.is_owner()
+    @commands.is_owner()
     async def _reload(self, ctx, *, ext: str = None):
         """Reloads a module. Can only be used by the owner."""
 
@@ -46,4 +44,4 @@ class Admin:
 
 
 def setup(bot):
-    bot.add_cog(Admin(bot))
+    bot.add_cog(Owner(bot))

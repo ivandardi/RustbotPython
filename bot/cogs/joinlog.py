@@ -10,43 +10,33 @@ log = logging.getLogger(__name__)
 class JoinLog:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.modjoin_channel_id = 278360426213933056
-
-    def modjoin_channel(self, guild: discord.Guild):
-        return guild.get_channel(channel_id=self.modjoin_channel_id)
+        self.modjoin_channel = self.bot.get_channel(id=278360426213933056)
 
     async def on_member_join(self, member: discord.Member):
-
         embed = discord.Embed(title=f'{member.name}', color=discord.Color.green())
         embed.add_field(name='ID', value=member.id)
         embed.add_field(name='Created at', value=member.created_at)
         embed.timestamp = datetime.utcnow()
 
-        await self.send_message(member.guild, embed)
+        await self.modjoin_channel.send(embed=embed)
 
     async def on_member_remove(self, member: discord.Member):
-
         embed = discord.Embed(title=f'{member.name}', color=discord.Color.red())
         embed.add_field(name='ID', value=member.id)
         embed.timestamp = datetime.utcnow()
 
-        await self.send_message(member.guild, embed)
+        await self.modjoin_channel.send(embed=embed)
 
-    async def send_message(self, guild: discord.Guild, embed: discord.Embed):
-        try:
-            await self.modjoin_channel(guild).send(embed=embed)
-        except discord.Forbidden as e:
+    async def __error(self, ctx: commands.Context, error):
+        if isinstance(error, discord.Forbidden):
             log.exception('No permissions to send message!')
-            log.exception('Exception: {}'.format(e))
-        except discord.NotFound as e:
+        if isinstance(error, discord.NotFound):
             log.exception('The mod-log channel was not found!')
-            log.exception('Exception: {}'.format(e))
-        except discord.HTTPException as e:
+        if isinstance(error, discord.HTTPException):
             log.exception('Sending the message failed!')
-            log.exception('Exception: {}'.format(e))
-        except discord.InvalidArgument as e:
+        if isinstance(error, discord.InvalidArgument):
             log.exception('The destination parameter is invalid')
-            log.exception('Exception: {}'.format(e))
+        log.exception('JoinLog Exception: %s', error)
 
 
 def setup(bot):

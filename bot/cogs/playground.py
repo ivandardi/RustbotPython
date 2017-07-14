@@ -43,29 +43,32 @@ class Playground:
 
     @commands.command()
     async def play(self, ctx: commands.Context, *, code: CodeBlock):
-        """Evaluates Rust code. Exactly equal to http://play.integer32.com/"""
+        """Evaluates Rust code. Exactly equal to https://play.integer32.com/"""
 
-        payload = json.dumps({
-            'channel': 'nightly',
-            'code': code.source,
-            'crateType': 'bin',
-            'mode': 'debug',
-            'tests': False,
-        })
+        async with ctx.typing():
+            payload = json.dumps({
+                'channel': 'nightly',
+                'code': code.source,
+                'crateType': 'bin',
+                'mode': 'debug',
+                'tests': False,
+            })
 
-        async with self.session.post('http://play.integer32.com/execute', data=payload) as r:
-            if r.status != 200:
-                raise commands.CommandError("Rust i32 Playground didn't respond in time.")
+            async with self.session.post('https://play.integer32.com/execute', data=payload) as r:
+                if r.status != 200:
+                    raise commands.CommandError("Rust i32 Playground didn't respond in time.")
 
-            response = await r.json()
-            if 'error' in response:
-                raise commands.CommandError(response['error'])
+                response = await r.json()
+                if 'error' in response:
+                    raise commands.CommandError(response['error'])
 
-            msg = response['stderr'] + response['stdout']
-            if len(msg) > 2000:
-                msg = await self.get_gist(msg)
+                full_response = response['stderr'] + response['stdout']
+                if len(full_response) >= 1990:
+                    msg = await self.get_gist(full_response)
+                else:
+                    msg = f'```rs\n{full_response}```'
 
-        await ctx.send(f'```rs\n{msg}```')
+        await ctx.send(msg)
 
     async def get_gist(self, msg):
         data = json.dumps({
@@ -86,9 +89,8 @@ class Playground:
 
         return 'https://gist.github.com/anonymous/' + response['id']
 
-    @play.error
-    async def play_error(self, ctx: commands.Context, error):
-        log.error(f'Playground error: {error}')
+    async def __error(self, ctx: commands.Context, error):
+        log.error('Playground error: %s', error)
         if isinstance(error, (discord.HTTPException, discord.Forbidden)):
             await ctx.send('Error while sending the output.')
         if isinstance(error, commands.MissingRequiredArgument):
@@ -97,8 +99,7 @@ class Playground:
             await ctx.send(str(error))
         await ctx.message.add_reaction('❌')
 
-    @play.after_invoke
-    async def play_after(self, ctx: commands.Context):
+    async def __after_invoke(self, ctx: commands.Context):
         await ctx.message.add_reaction('👌')
 
 

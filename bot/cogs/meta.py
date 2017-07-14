@@ -29,10 +29,10 @@ class TimeParser:
                 self.seconds += int(seconds)
 
         if self.seconds < 0:
-            raise commands.BadArgument('I don\'t do negative time.')
+            raise commands.BadArgument("I don't do negative time.")
 
         if self.seconds > 604800:  # 7 days
-            raise commands.BadArgument('That\'s a bit too far in the future for me.')
+            raise commands.BadArgument("That's a bit too far in the future for me.")
 
 
 class Meta:
@@ -68,23 +68,19 @@ class Meta:
         message = message.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
 
         if not message:
-            reminder = 'Okay {0.mention}, I\'ll remind you in {1.seconds} seconds.'
+            reminder = "Okay {0.mention}, I'll remind you in {1.seconds} seconds."
             completed = 'Time is up {0.mention}! You asked to be reminded about something.'
         else:
-            reminder = 'Okay {0.mention}, I\'ll remind you about "{2}" in {1.seconds} seconds.'
+            reminder = '''Okay {0.mention}, I'll remind you about "{2}" in {1.seconds} seconds.'''
             completed = 'Time is up {0.mention}! You asked to be reminded about "{1}".'
 
         await ctx.send(reminder.format(author, time, message))
         await asyncio.sleep(time.seconds)
         await ctx.send(completed.format(author, message))
 
-    @timer.error
-    async def timer_error(self, error, ctx: commands.context.Context):
-        if type(error) is commands.BadArgument:
-            await ctx.send(str(error))
-
-    @commands.command(no_pm=True)
-    async def info(self, ctx: commands.Context, *, member: discord.Member = None):
+    @commands.command()
+    @commands.guild_only()
+    async def userinfo(self, ctx: commands.Context, *, member: discord.Member = None):
         """Shows info about a member.
         This cannot be used in private messages. If you don't specify
         a member then the info returned will be yours.
@@ -113,6 +109,9 @@ class Meta:
     @commands.command()
     async def clean(self, ctx: commands.Context, limit=100):
         """Deletes the bot's messages up to the most 100 recent messages."""
+
+        if limit > 100:
+            raise commands.BadArgument('Limit is too high!')
 
         def is_me(m):
             return m.author.id == self.bot.user.id
