@@ -13,6 +13,7 @@ class Roles:
 
     async def __before_invoke(self, ctx: commands.Context):
         if not self.roles:
+            await self.bot.wait_until_ready()
             self.roles = [role for role in ctx.guild.roles if role.name.startswith('rust-')]
 
     async def __after_invoke(self, ctx: commands.Context):
@@ -35,17 +36,20 @@ class Roles:
     @role.command()
     async def add(self, ctx: commands.Context, role: discord.Role):
         """Add a role to your list of visible roles."""
-        if role in self.roles:
-            await ctx.author.add_roles(role)
-            log.info('Added role %s to member %s', role, ctx.author)
-        else:
-            raise commands.BadArgument(f'Role "{role}" not found.')
+        await self._role_action(role, ctx.author.add_roles)
+        log.info('Added role %s to member %s', role, ctx.author)
 
     @role.command(name='del')
     async def _del(self, ctx: commands.Context, role: discord.Role):
         """Delete a role from your list of visible roles."""
-        await ctx.author.remove_roles(role)
+        self._role_action(role, ctx.author.remove_roles)
         log.info('Removed role %s from member %s', role, ctx.author)
+
+    async def _role_action(self, role, action):
+        if role in self.roles:
+            await action(role)
+        else:
+            raise commands.BadArgument(f'Role "{role}" not found.')
 
     @role.command(name='list')
     async def _list(self, ctx: commands.Context):
