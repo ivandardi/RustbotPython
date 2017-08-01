@@ -17,23 +17,33 @@ class JoinLog:
     async def welcome_channel(self):
         if not self._welcome_channel:
             await self.bot.wait_until_ready()
+            log.debug('Getting welcome channel')
             self._welcome_channel = self.bot.get_channel(id=338125445256052736)
+            if not self._welcome_channel:
+                raise RuntimeError('Failed to get welcome channel!')
+        return self._welcome_channel
 
     async def ferris_emoji(self):
         if not self._ferris_emoji:
             await self.bot.wait_until_ready()
             self._ferris_emoji = self.bot.get_emoji(id=298953944292392960)
+            if not self._ferris_emoji:
+                raise RuntimeError('Failed to get ferris emoji!')
+        return self._ferris_emoji
 
     async def on_member_join(self, member: discord.Member):
         welcome_channel = await self.welcome_channel()
         ferris_emoji = await self.ferris_emoji()
 
+        if member.bot:
+            return
+
         await self.set_global_permissions(member=member, overwrite=self.overwrites)
 
-        msg = await welcome_channel.send(
-            f'{member.mention} [{member} ({member.id}), welcome to the **Rust Programming Language** server!\n'
-            "If you're here for the language, click on the Ferris.\n"
-            "If you're here for Rust the game, click on the game controller.")
+        await welcome_channel.send(f'[{member} ({member.id})]\n'
+                                   f'{member.mention}, welcome to the **Rust Programming Language** server!')
+        msg = await welcome_channel.send("If you're here for the language, click on the Ferris.\n"
+                                         "If you're here for Rust the game, click on the game controller.")
         await msg.add_reaction('\N{VIDEO GAME}')
         await msg.add_reaction(ferris_emoji)
 
@@ -57,18 +67,21 @@ class JoinLog:
             emoji = reaction.emoji
             if isinstance(emoji, str) and emoji == '\N{VIDEO GAME}':
                 return await member.kick(reason='Wrong Rust server')
-
             await self.set_global_permissions(member=member, overwrite=None)
-            await msg.edit(
-                content=f'{member.mention} [{member} ({member.id}), welcome to the **Rust Programming Language** server!\n')
+        finally:
+            await msg.delete()
 
     async def set_global_permissions(self, *, member, overwrite):
         for channel in member.guild.channels:
-            await channel.set_permissions(member, overwrite=overwrite)
+            try:
+                await channel.set_permissions(member, overwrite=overwrite)
+            except Exception as e:
+                log.error('set_global_permissions on %s: %s', channel, e)
 
     async def on_member_remove(self, member: discord.Member):
         welcome_channel = await self.welcome_channel()
-        await welcome_channel.send(f'Goodbye, {member.mention} :( [{member} ({member.id})]')
+        await welcome_channel.send(f'[{member} ({member.id})]\n'
+                                   f'Goodbye, {member.mention} :(')
 
     async def __error(self, ctx: commands.Context, error):
         if isinstance(error, discord.Forbidden):
