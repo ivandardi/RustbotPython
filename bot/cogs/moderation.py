@@ -19,7 +19,6 @@ class Moderation:
     def __init__(self, bot):
         self.bot = bot
         self.modlog_channel = None
-        self.rustacean_role = None
 
     async def __error(self, ctx: commands.Context, error):
         await ctx.message.clear_reactions()
@@ -31,14 +30,13 @@ class Moderation:
             await ctx.send(f'It failed! {error}')
 
     async def __before_invoke(self, ctx: commands.Context):
-        if self.modlog_channel or self.rustacean_role:
+        if self.modlog_channel:
             return
 
         self.modlog_channel = self.bot.get_channel(id=274214329073795074)
-        self.rustacean_role = discord.utils.get(ctx.guild.roles, id=319953207193501696)
 
-        if not self.modlog_channel or not self.rustacean_role:
-            raise RuntimeError('Failed to fetch channels and roles!')
+        if not self.modlog_channel:
+            raise RuntimeError('Failed to get modlog channel!')
 
     async def __after_invoke(self, ctx: commands.Context):
         await ctx.message.add_reaction('👌')
@@ -49,12 +47,6 @@ class Moderation:
 
     async def __local_check(self, ctx: commands.Context):
         return any(role.name in ('Admin', 'Moderator', 'Bot Admin') for role in ctx.author.roles)
-
-    @commands.command()
-    @commands.guild_only()
-    async def rust(self, ctx: commands.Context, member: discord.Member):
-        """Adds the Rustacean role to a member."""
-        await member.add_roles(self.rustacean_role)
 
     @commands.command()
     @commands.guild_only()

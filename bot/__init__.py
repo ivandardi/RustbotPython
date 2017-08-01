@@ -64,8 +64,10 @@ class RustBot(commands.Bot):
     async def on_command_error(self, ctx: commands.Context, error):
         tb = ''.join(traceback.format_exception(type(error), error, error.__traceback__))
         log.error(f'Command error in %s:\n%s', ctx.command, tb)
+        if isinstance(error, commands.CheckFailure):
+            return await ctx.send(f"You aren't allowed to run this command!")
         if not isinstance(error, commands.CommandNotFound):
-            await ctx.send(error)
+            return await ctx.send(error)
 
 
 def main():

@@ -10,6 +10,7 @@ class Roles:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.roles = None
+        self.rustacean_role = None
 
     async def __before_invoke(self, ctx: commands.Context):
         if not self.roles:
@@ -18,6 +19,15 @@ class Roles:
 
     async def __after_invoke(self, ctx: commands.Context):
         await ctx.message.add_reaction('👌')
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_role('Moderator')
+    async def rust(self, ctx: commands.Context, member: discord.Member):
+        """Adds the Rustacean role to a member."""
+        if not self.rustacean_role:
+            self.rustacean_role = discord.utils.get(ctx.guild.roles, id=319953207193501696)
+        await member.add_roles(self.rustacean_role)
 
     @commands.group(aliases=['roles'])
     async def role(self, ctx: commands.Context):
