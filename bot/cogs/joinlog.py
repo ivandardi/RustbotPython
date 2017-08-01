@@ -34,8 +34,8 @@ class JoinLog:
             f'{member.mention} [{member} ({member.id}), welcome to the **Rust Programming Language** server!\n'
             "If you're here for the language, click on the Ferris.\n"
             "If you're here for Rust the game, click on the game controller.")
-        reaction_game = await msg.add_reaction('\N{VIDEO GAME}')
-        reaction_lang = await msg.add_reaction(ferris_emoji)
+        await msg.add_reaction('\N{VIDEO GAME}')
+        await msg.add_reaction(ferris_emoji)
 
         def react_check(reaction, user):
             if not user or user.id != member.id:
@@ -44,7 +44,7 @@ class JoinLog:
             if reaction.message.id != msg.id:
                 return False
 
-            if reaction in (reaction_game, reaction_lang):
+            if reaction.emoji in (ferris_emoji, '\N{VIDEO GAME}'):
                 return True
 
             return False
@@ -54,7 +54,8 @@ class JoinLog:
         except asyncio.TimeoutError:
             await member.kick(reason="Didn't react to welcome message in time")
         else:
-            if reaction == reaction_game:
+            emoji = reaction.emoji
+            if isinstance(emoji, str) and emoji == '\N{VIDEO GAME}':
                 return await member.kick(reason='Wrong Rust server')
 
             await self.set_global_permissions(member=member, overwrite=None)
