@@ -42,8 +42,9 @@ class JoinLog:
 
         await welcome_channel.send(f'[{member} ({member.id})]\n'
                                    f'{member.mention}, welcome to the **Rust Programming Language** server!')
-        msg = await welcome_channel.send("If you're here for the language, click on the Ferris.\n"
-                                         "If you're here for Rust the game, click on the game controller.")
+        msg = await welcome_channel.send(f"{member.mention}, If you're here for the language, click on the Ferris.\n"
+                                         "If you're here for Rust the game, click on the game controller.\n"
+                                         "If you take more than 5 minutes to react, you'll be kicked.")
         await msg.add_reaction('\N{VIDEO GAME}')
         await msg.add_reaction(ferris_emoji)
 
@@ -60,7 +61,7 @@ class JoinLog:
             return False
 
         try:
-            reaction, user = await self.bot.wait_for('reaction_add', check=react_check, timeout=120.0)
+            reaction, user = await self.bot.wait_for('reaction_add', check=react_check, timeout=300.0)
         except asyncio.TimeoutError:
             await member.kick(reason="Didn't react to welcome message in time")
         else:
