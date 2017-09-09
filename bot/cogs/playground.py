@@ -63,12 +63,15 @@ class Playground:
                     raise commands.CommandError(response['error'])
 
                 full_response = response['stderr'] + response['stdout']
-                if len(full_response) >= 1990:
+                len_response = len(full_response)
+                if len_response < 1990:
+                    msg = f'```rs\n{full_response}```'
+                elif 1990 <= len_response <= 5000:
                     msg = await self.get_gist(full_response)
                 else:
-                    msg = f'```rs\n{full_response}```'
+                    raise commands.CommandError("Output too big!")
 
-        await ctx.send(msg)
+                await ctx.send(msg)
 
     async def get_gist(self, msg):
         data = json.dumps({

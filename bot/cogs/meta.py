@@ -107,7 +107,7 @@ class Meta:
         await ctx.send(embed=e)
 
     @commands.command()
-    async def clean(self, ctx: commands.Context, limit=100):
+    async def cleanup(self, ctx: commands.Context, limit=100):
         """Deletes the bot's messages up to the most 100 recent messages."""
 
         if limit > 100:
