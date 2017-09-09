@@ -12,7 +12,6 @@ class JoinLog:
         self.bot = bot
         self._welcome_channel = None
         self._ferris_emoji = None
-        self.overwrites = discord.PermissionOverwrite(send_messages=False, read_messages=True)
 
     async def welcome_channel(self):
         if not self._welcome_channel:
@@ -38,13 +37,13 @@ class JoinLog:
         if member.bot:
             return
 
-        await self.set_global_permissions(member=member, overwrite=self.overwrites)
-
         await welcome_channel.send(f'[{member} ({member.id})]\n'
                                    f'{member.mention}, welcome to the **Rust Programming Language** server!')
-        msg = await welcome_channel.send(f"{member.mention}, If you're here for the language, click on the Ferris.\n"
-                                         "If you're here for Rust the game, click on the game controller.\n"
-                                         "If you take more than 5 minutes to react, you'll be kicked.")
+        msg = await welcome_channel.send(f"{member.mention}, If you're here for the language, react with the Ferris.\n"
+                                         "If you're here for Rust the game, react with the game controller.\n\n"
+                                         "If you're here for the game, reacting with the game controller will kick you"
+                                         "from this server so that you can look for the right one.\n"
+                                         "If you take more than 5 minutes to react, **you'll be kicked**.")
         await msg.add_reaction('\N{VIDEO GAME}')
         await msg.add_reaction(ferris_emoji)
 
@@ -61,23 +60,15 @@ class JoinLog:
             return False
 
         try:
-            reaction, user = await self.bot.wait_for('reaction_add', check=react_check, timeout=300.0)
+            reaction, user = await self.bot.wait_for('reaction_add', check=react_check, timeout=60 * 5)
         except asyncio.TimeoutError:
             await member.kick(reason="Didn't react to welcome message in time")
         else:
             emoji = reaction.emoji
             if isinstance(emoji, str) and emoji == '\N{VIDEO GAME}':
                 return await member.kick(reason='Wrong Rust server')
-            await self.set_global_permissions(member=member, overwrite=None)
         finally:
             await msg.delete()
-
-    async def set_global_permissions(self, *, member, overwrite):
-        for channel in member.guild.channels:
-            try:
-                await channel.set_permissions(member, overwrite=overwrite)
-            except Exception as e:
-                log.error('set_global_permissions on %s: %s', channel, e)
 
     async def on_member_remove(self, member: discord.Member):
         welcome_channel = await self.welcome_channel()
