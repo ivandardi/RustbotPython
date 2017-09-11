@@ -10,42 +10,43 @@ log = logging.getLogger(__name__)
 class JoinLog:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self._welcome_channel = None
-        self._ferris_emoji = None
+        self.welcome_channel = None
+        self.ferris_emoji = None
+        self.newcomer_role = None
 
-    async def welcome_channel(self):
-        if not self._welcome_channel:
-            await self.bot.wait_until_ready()
-            log.debug('Getting welcome channel')
-            self._welcome_channel = self.bot.get_channel(id=338125445256052736)
-            if not self._welcome_channel:
-                raise RuntimeError('Failed to get welcome channel!')
-        return self._welcome_channel
+    async def initialize(self, guild: discord.Guild):
+        await self.bot.wait_until_ready()
 
-    async def ferris_emoji(self):
-        if not self._ferris_emoji:
-            await self.bot.wait_until_ready()
-            self._ferris_emoji = self.bot.get_emoji(id=298953944292392960)
-            if not self._ferris_emoji:
-                raise RuntimeError('Failed to get ferris emoji!')
-        return self._ferris_emoji
+        if not self.welcome_channel:
+            self.welcome_channel = self.bot.get_channel(id=338125445256052736)
+        if not self.ferris_emoji:
+            self.ferris_emoji = self.bot.get_emoji(id=298953944292392960)
+        if not self.newcomer_role:
+            self.newcomer_role = discord.utils.get(guild.roles, id=356627450790281216)
+
+        if not all([self.welcome_channel, self.ferris_emoji, self.newcomer_role]):
+            raise RuntimeError('Failed to initialize joinlog!')
 
     async def on_member_join(self, member: discord.Member):
-        welcome_channel = await self.welcome_channel()
-        ferris_emoji = await self.ferris_emoji()
+        await self.initialize(member.guild)
 
         if member.bot:
             return
 
-        await welcome_channel.send(f'[{member} ({member.id})]\n'
-                                   f'{member.mention}, welcome to the **Rust Programming Language** server!')
-        msg = await welcome_channel.send(f"{member.mention}, If you're here for the language, react with the Ferris.\n"
-                                         "If you're here for Rust the game, react with the game controller.\n\n"
-                                         "If you're here for the game, reacting with the game controller will kick you"
-                                         "from this server so that you can look for the right one.\n"
-                                         "If you take more than 5 minutes to react, **you'll be kicked**.")
+        await member.add_roles(self.newcomer_role, reason='Newcomer to the server')
+        await self.welcome_channel.send(
+            f'[{member} ({member.id})]\n'
+            f'{member.mention}, welcome to the **Rust Programming Language** server!'
+        )
+        msg = await self.welcome_channel.send(
+            f"{member.mention}, If you're here for the language, react with the Ferris.\n"
+            "If you're here for Rust the game, react with the game controller.\n\n"
+            "If you're here for the game, reacting with the game controller will kick you "
+            "from this server so that you can look for the right Rust server.\n"
+            "If you take more than 5 minutes to react, **you'll be kicked**."
+        )
         await msg.add_reaction('\N{VIDEO GAME}')
-        await msg.add_reaction(ferris_emoji)
+        await msg.add_reaction(self.ferris_emoji)
 
         def react_check(reaction, user):
             if not user or user.id != member.id:
@@ -54,7 +55,7 @@ class JoinLog:
             if reaction.message.id != msg.id:
                 return False
 
-            if reaction.emoji in (ferris_emoji, '\N{VIDEO GAME}'):
+            if reaction.emoji in (self.ferris_emoji, '\N{VIDEO GAME}'):
                 return True
 
             return False
@@ -69,11 +70,12 @@ class JoinLog:
                 return await member.kick(reason='Wrong Rust server')
         finally:
             await msg.delete()
+            await member.remove_roles(self.newcomer_role, reason='Passed the welcome check')
 
     async def on_member_remove(self, member: discord.Member):
-        welcome_channel = await self.welcome_channel()
-        await welcome_channel.send(f'[{member} ({member.id})]\n'
-                                   f'Goodbye, {member.mention} :(')
+        await self.initialize(member.guild)
+        await self.welcome_channel.send(f'[{member} ({member.id})]\n'
+                                        f'Goodbye, {member.mention} :(')
 
     async def __error(self, ctx: commands.Context, error):
         if isinstance(error, discord.Forbidden):
