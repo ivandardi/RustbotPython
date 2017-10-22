@@ -137,19 +137,19 @@ class Moderation:
         await member.add_roles(self.rustacean_role)
 
 
-async def make_modlog_entry(self, ctx: commands.Context, action: ModerationAction):
-    async for m in self.modlog_channel.history(limit=1):
-        action_id = int(next(iter(m.content.split()))) + 1
+    async def make_modlog_entry(self, ctx: commands.Context, action: ModerationAction):
+        async for m in self.modlog_channel.history(limit=1):
+            action_id = int(next(iter(m.content.split()))) + 1
+    
+        msg = '\n\n'.join([
+            f'{action_id} | **{action.name}**',
+            f'**User**\n{action.member.mention} ({str(action.member)} {action.member.id})',
+            f'**Reason**\n{action.reason}',
+            f'**Responsible Moderator**\n{ctx.message.author.mention}',
+            f'**Timestamp**\n{ctx.message.created_at}',
+        ])
 
-    msg = '\n\n'.join([
-        f'{action_id} | **{action.name}**',
-        f'**User**\n{action.member.mention} ({str(action.member)} {action.member.id})',
-        f'**Reason**\n{action.reason}',
-        f'**Responsible Moderator**\n{ctx.message.author.mention}',
-        f'**Timestamp**\n{ctx.message.created_at}',
-    ])
-
-    return msg
+        return msg
 
 
 def setup(bot):
