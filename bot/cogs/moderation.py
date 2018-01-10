@@ -1,5 +1,4 @@
 import logging
-from typing import Iterable
 
 import discord
 from discord.ext import commands
@@ -77,9 +76,12 @@ class Moderation:
     async def __after_invoke(self, ctx: commands.Context):
         await ctx.message.add_reaction('👌')
 
-        action = ctx.action
-        msg = await self.make_modlog_entry(ctx, action)
-        await self.modlog_channel.send(msg)
+        try:
+            action = ctx.action
+            msg = await self.make_modlog_entry(ctx, action)
+            await self.modlog_channel.send(msg)
+        except AttributeError:
+            pass
 
     async def __local_check(self, ctx: commands.Context):
         return any(role.name in ('Admin', 'Moderator', 'Bot Admin') for role in ctx.author.roles)
@@ -195,7 +197,7 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
-    async def rust(self, ctx: commands.Context, *members: Iterable[discord.Member]):
+    async def rust(self, ctx: commands.Context, *members: discord.Member):
         """Adds the Rustacean role to a member."""
         if not self.rustacean_role:
             self.rustacean_role = discord.utils.get(ctx.guild.roles, id=319953207193501696)
