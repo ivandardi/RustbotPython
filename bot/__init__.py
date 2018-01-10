@@ -34,7 +34,7 @@ class RustBot(commands.Bot):
         super().__init__(*args, **kwargs)
         self.uptime = datetime.datetime.utcnow()
         self.initial_extensions = [
-            'bot.cogs.joinlog',
+            # 'bot.cogs.joinlog',  # Disable because it's not really needed anymore
             'bot.cogs.meta',
             'bot.cogs.moderation',
             'bot.cogs.owner',
