@@ -109,7 +109,7 @@ class Moderation:
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx: commands.Context, member: MemberID, days: int = 0, *, reason: str):
+    async def ban(self, ctx: commands.Context, member: MemberID, days: int, *, reason: str):
         """Bans a member from the server.
 
         In order for this to work, the bot must have Ban Member permissions.
