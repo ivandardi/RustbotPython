@@ -31,7 +31,7 @@ class TimeParser:
         if self.seconds < 0:
             raise commands.BadArgument("I don't do negative time.")
 
-        if self.seconds > 604800:  # 7 days
+        if self.seconds > 7 * 60 * 60:  # 7 days
             raise commands.BadArgument("That's a bit too far in the future for me.")
 
 
@@ -56,7 +56,7 @@ class Meta:
         await ctx.send(content='Uptime: **{}**'.format(fmt.format(d=days, h=hours, m=minutes, s=seconds)))
 
     @commands.command(aliases=['reminder', 'remind'])
-    async def timer(self, ctx: commands.Context, time: TimeParser, *, message=''):
+    async def timer(self, ctx: commands.Context, time: TimeParser, *, message='something'):
         """Reminds you of something after a certain amount of time.
         The time can optionally be specified with units such as 'h'
         for hours, 'm' for minutes and 's' for seconds. If no unit
@@ -67,12 +67,8 @@ class Meta:
         author = ctx.message.author
         message = message.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
 
-        if not message:
-            reminder = "Okay {0.mention}, I'll remind you in {1.seconds} seconds."
-            completed = 'Time is up {0.mention}! You asked to be reminded about something.'
-        else:
-            reminder = '''Okay {0.mention}, I'll remind you about "{2}" in {1.seconds} seconds.'''
-            completed = 'Time is up {0.mention}! You asked to be reminded about "{1}".'
+        reminder = '''Okay {0.mention}, I'll remind you about "{2}" in {1.seconds} seconds.'''
+        completed = 'Time is up {0.mention}! You asked to be reminded about "{1}".'
 
         await ctx.send(reminder.format(author, time, message))
         await asyncio.sleep(time.seconds)
@@ -85,7 +81,6 @@ class Meta:
         This cannot be used in private messages. If you don't specify
         a member then the info returned will be yours.
         """
-        channel = ctx.channel
         if member is None:
             member = ctx.author
 
