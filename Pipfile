@@ -1,12 +1,11 @@
 [[source]]
 url = "https://pypi.python.org/simple"
 verify_ssl = true
+name = "pypi"
+
 
 [packages]
-aiohttp = ">=2.2.3"
-websockets = "*"
+aiohttp = "*"
+"discord.py" = {git = "https://github.com/Rapptz/discord.py", ref = "rewrite"}
 
-[packages."discord.py"]
-git = "https://github.com/rapptz/discord.py.git"
-editable = true
-ref = "rewrite"
+[dev-packages]
