@@ -31,7 +31,7 @@ class TimeParser:
         if self.seconds < 0:
             raise commands.BadArgument("I don't do negative time.")
 
-        if self.seconds > 7 * 60 * 60:  # 7 days
+        if self.seconds > 7 * 24 * 60 * 60:  # 7 days
             raise commands.BadArgument("That's a bit too far in the future for me.")
 
 
@@ -41,7 +41,7 @@ class Meta:
 
     @commands.command()
     async def uptime(self, ctx: commands.Context):
-        """Tells you how long the bot has been up for"""
+        """Tells you how long the bot has been up for."""
 
         now = datetime.datetime.utcnow()
         delta = now - self.bot.uptime
