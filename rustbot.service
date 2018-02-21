@@ -1,0 +1,15 @@
+[Unit]
+Description=RustBot (aka Ferris) for the Rust Programming Guild
+After=network.target
+
+[Service]
+EnvironmentFile=/home/ferris/env
+Type=simple
+User=ferris
+ExecStart=/usr/bin/env python3.6 -m bot
+WorkingDirectory=/home/ferris/repo
+Restart=always
+RestartSec=600
+
+[Install]
+WantedBy=multi-user.target
