@@ -18,7 +18,7 @@ class Owner:
     @commands.is_owner()
     async def status(self, ctx: commands.Context, *, status: str):
         """Changes the bot's status. Can only be used by the owner."""
-        await self.bot.change_presence(game=discord.Game(name=status))
+        await self.bot.change_presence(activity=discord.Game(name=status))
 
     @commands.command(name='reload')
     @commands.is_owner()
