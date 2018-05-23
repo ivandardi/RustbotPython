@@ -53,7 +53,6 @@ class Moderation:
     def __init__(self, bot):
         self.bot = bot
         self.modlog_channel = None
-        self.rustacean_role = None
 
     async def __error(self, ctx: commands.Context, error):
         await ctx.message.clear_reactions()
@@ -194,15 +193,6 @@ class Moderation:
 
         deleted = await ctx.channel.purge(limit=limit)
         await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
-
-    @commands.command()
-    @commands.guild_only()
-    async def rust(self, ctx: commands.Context, *members: discord.Member):
-        """Adds the Rustacean role to a member."""
-        if not self.rustacean_role:
-            self.rustacean_role = discord.utils.get(ctx.guild.roles, id=319953207193501696)
-        for member in members:
-            await member.add_roles(self.rustacean_role, reason='You have been rusted! owo')
 
     async def make_modlog_entry(self, ctx: commands.Context, action: ModerationAction):
         async for m in self.modlog_channel.history(limit=1):

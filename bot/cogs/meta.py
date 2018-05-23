@@ -38,6 +38,7 @@ class TimeParser:
 class Meta:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.rustacean_role = None
 
     @commands.command()
     async def uptime(self, ctx: commands.Context):
@@ -73,6 +74,21 @@ class Meta:
         await ctx.send(reminder.format(author, time, message))
         await asyncio.sleep(time.seconds)
         await ctx.send(completed.format(author, message))
+
+    @commands.command()
+    @commands.guild_only()
+    async def rustify(self, ctx: commands.Context, *members: discord.Member):
+        """Adds the Rustacean role to a member.
+        Takes in a list of member mentions and/or IDs.
+        """
+        if not self.rustacean_role:
+            self.rustacean_role = discord.utils.get(ctx.guild.roles, id=319953207193501696)
+        if self.rustacean_role not in ctx.author.roles:
+            await ctx.message.add_reaction('❌')
+            return
+        for member in members:
+            await member.add_roles(self.rustacean_role, reason='You have been rusted! owo')
+        await ctx.message.add_reaction('👌')
 
     @commands.command()
     @commands.guild_only()
