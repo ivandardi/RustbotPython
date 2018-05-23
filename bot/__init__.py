@@ -70,7 +70,7 @@ class RustBot(commands.Bot):
 
 def main():
     bot = RustBot(
-        command_prefix=commands.when_mentioned_or('?'),
+        command_prefix=commands.when_mentioned_or('?', 'hey ferris can you'),
     )
 
     bot.run(os.environ['TOKEN_DISCORD'])
