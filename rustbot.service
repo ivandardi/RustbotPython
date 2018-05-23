@@ -7,7 +7,7 @@ EnvironmentFile=/home/ferris/env
 Type=simple
 User=ferris
 ExecStart=/usr/bin/env python3.6 -m bot
-WorkingDirectory=/home/ferris/repo
+WorkingDirectory=/home/ferris/prod
 Restart=always
 RestartSec=600
 
