@@ -1,15 +1,33 @@
 import asyncio
 import datetime
 import re
+import random
 
 import discord
 from discord.ext import commands
 
 
 class TimeParser:
+
+        negative_times = [
+        "I don't do negative time",
+        "Negative time? Time travel? Pfft Marty, that's just silly!",
+        "Quick! To the Delorean! ... Oh wait, we don't have one 🤔",
+        "NEGATIVE TIME IS UNSAFE 😭",
+        "Always positive time pls",
+        "NEGATIVE TIME? BAAAAAAAAAAAAAAANNE!",
+    ]
+
+    too_big_times = [
+        "That's a bit too far in the future for me",
+        "If you need to be remembered that far in the future, maaaybe use a calendar?",
+        "The limit is 7 days :v",
+        "REMINDER IN MORE THAN 7 DAYS? BAAAAAAAAAAAAAANNE!",
+    ]
+
     def __init__(self, argument):
         compiled = re.compile(
-            r"(?:(?P<hours>\d+)h)?(?:(?P<minutes>\d+)m)?(?:(?P<seconds>\d+)s)?"
+            r"(?:(?P<days>\d+)d)?(?:(?P<hours>\d+)h)?(?:(?P<minutes>\d+)m)?(?:(?P<seconds>\d+)s)?"
         )
         self.original = argument
         try:
@@ -20,6 +38,9 @@ class TimeParser:
                 raise commands.BadArgument("Failed to parse time.") from e
 
             self.seconds = 0
+            days = match.group("days")
+            if days is not None:
+                self.seconds += int(days) * 86400
             hours = match.group("hours")
             if hours is not None:
                 self.seconds += int(hours) * 3600
@@ -31,10 +52,12 @@ class TimeParser:
                 self.seconds += int(seconds)
 
         if self.seconds < 0:
-            raise commands.BadArgument("I don't do negative time.")
+            error_msg = random.choice(self.negative_times)
+            raise commands.BadArgument(error_msg)
 
         if self.seconds > 7 * 24 * 60 * 60:  # 7 days
-            raise commands.BadArgument("That's a bit too far in the future for me.")
+            error_msg = random.choice(self.too_big_times)
+            raise commands.BadArgument(error_msg)
 
 
 class Meta:
@@ -71,6 +94,11 @@ class Meta:
         for hours, 'm' for minutes and 's' for seconds. If no unit
         is given then it is assumed to be seconds. You can also combine
         multiple units together, e.g. 2h4m10s.
+        The time can optionally be specified with units such as 'd' for days,
+        'h' for hours, 'm' for minutes and 's' for seconds.
+        If no unit is given then it is assumed to be seconds. You can also
+        combine multiple units together, e.g. 3d2h4m10s.
+        The maximum time limit is 7 days.
         """
 
         author = ctx.message.author
@@ -78,14 +106,9 @@ class Meta:
             "@here", "@\u200bhere"
         )
 
-        reminder = (
-            """Okay {0.mention}, I'll remind you about "{2}" in {1.seconds} seconds."""
-        )
-        completed = 'Time is up {0.mention}! You asked to be reminded about "{1}".'
-
-        await ctx.send(reminder.format(author, time, message))
+        await ctx.send(f"""Okay {author.mention}, I'll remind you about "{message}" in {time.seconds} seconds.""")
         await asyncio.sleep(time.seconds)
-        await ctx.send(completed.format(author, message))
+        await ctx.send(f'Time is up {author.mention}! You asked to be reminded about "{message}".')
 
     @commands.command()
     @commands.guild_only()
@@ -108,10 +131,9 @@ class Meta:
 
     @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=100):
-        """Deletes the bot's messages up to the most 100 recent messages."""
-
-        if limit > 100:
-            raise commands.BadArgument("Limit is too high!")
+        """Deletes the bot's messages for cleanup. You can specify how many
+        messages to look for.
+        """
 
         def is_me(m):
             return m.author.id == self.bot.user.id
