@@ -132,8 +132,8 @@ class Meta:
 
     @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=100):
-        """Deletes the bot's messages for cleanup. You can specify how many
-        messages to look for.
+        """Deletes the bot's messages for cleanup.
+        You can specify how many messages to look for.
         """
 
         def is_me(m):

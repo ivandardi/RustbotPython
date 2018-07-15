@@ -55,7 +55,7 @@ class RustBot(commands.Bot):
         print("Logged in as", self.user)
         print("------")
 
-        await self.bot.change_presence(game=discord.Game(name="?help"))
+        await self.change_presence(game=discord.Game(name="?help"))
         self.emoji_rustok = discord.utils.get(self.emojis, name="rustOk")
 
     async def on_command(self, ctx):
