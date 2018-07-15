@@ -127,7 +127,7 @@ class Meta:
             await member.add_roles(
                 self.rustacean_role, reason="You have been rusted! owo"
             )
-        await ctx.message.add_reaction("👌")
+        await ctx.message.add_reaction(self.bot.emoji_rustok)
 
     @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=100):

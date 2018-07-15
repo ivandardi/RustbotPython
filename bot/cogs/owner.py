@@ -42,7 +42,7 @@ class Owner:
 
     @_reload.after_invoke
     async def ok_hand(self, ctx: commands.Context):
-        await ctx.message.add_reaction("👌")
+        await ctx.message.add_reaction(self.emoji_rustok)
 
 
 def setup(bot):

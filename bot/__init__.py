@@ -43,6 +43,7 @@ class RustBot(commands.Bot):
             "bot.cogs.owner",
             "bot.cogs.playground",
         ]
+        self.emoji_rustok = None
 
         for extension in self.initial_extensions:
             try:
@@ -55,6 +56,7 @@ class RustBot(commands.Bot):
         print("------")
 
         await self.bot.change_presence(game=discord.Game(name="?help"))
+        self.emoji_rustok = discord.utils.get(self.emojis, name='rustOk')
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):

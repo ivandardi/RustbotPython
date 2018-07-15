@@ -102,7 +102,7 @@ class Playground:
         await ctx.message.add_reaction("❌")
 
     async def __after_invoke(self, ctx: commands.Context):
-        await ctx.message.add_reaction("👌")
+        await ctx.message.add_reaction(self.bot.rustok)
 
 
 def setup(bot):

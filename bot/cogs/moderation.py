@@ -79,7 +79,7 @@ class Moderation:
             raise RuntimeError("Failed to get modlog channel!")
 
     async def __after_invoke(self, ctx: commands.Context):
-        await ctx.message.add_reaction("👌")
+        await ctx.message.add_reaction(self.bot.emoji_rustok)
 
         try:
             action = ctx.action
