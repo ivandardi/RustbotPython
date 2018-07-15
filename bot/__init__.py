@@ -56,7 +56,7 @@ class RustBot(commands.Bot):
         print("------")
 
         await self.bot.change_presence(game=discord.Game(name="?help"))
-        self.emoji_rustok = discord.utils.get(self.emojis, name='rustOk')
+        self.emoji_rustok = discord.utils.get(self.emojis, name="rustOk")
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):
@@ -77,7 +77,15 @@ class RustBot(commands.Bot):
 
 
 def main():
-    bot = RustBot(command_prefix=commands.when_mentioned_or("?", "hey ferris can you "))
+    bot = RustBot(
+        command_prefix=commands.when_mentioned_or(
+            "?",
+            "hey ferris can you ",
+            "hey ferris, can you ",
+            "hey fewwis can you ",
+            "hey fewwis, can you ",
+        )
+    )
 
     bot.run(os.environ["TOKEN_DISCORD"])
 

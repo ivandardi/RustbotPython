@@ -110,7 +110,7 @@ class Meta:
         await asyncio.sleep(time.seconds)
         await ctx.send(f'Time is up {author.mention}! You asked to be reminded about "{message}".')
 
-    @commands.command()
+    @commands.command(aliases=["wustify"])
     @commands.guild_only()
     async def rustify(self, ctx: commands.Context, *members: discord.Member):
         """Adds the Rustacean role to a member.
