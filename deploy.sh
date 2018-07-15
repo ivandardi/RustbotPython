@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eu
 
+git fetch --all
+git reset --hard origin/master
+
 repo_dir="$(dirname "$0")"
 dest_dir=/home/ferris/prod
 
