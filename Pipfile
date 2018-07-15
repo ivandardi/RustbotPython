@@ -7,7 +7,9 @@ name = "pypi"
 aiohttp = "*"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py", ref = "rewrite"}
 yarl = "<1.2"
-black = "*"
 
 [requires]
 python_version = "3.6"
+
+[dev-packages]
+black = "*"

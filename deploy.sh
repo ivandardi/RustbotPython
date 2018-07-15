@@ -14,7 +14,7 @@ sudo chown -R ferris:ferris "$dest_dir"
 echo "Installed source code to '$dest_dir'"
 
 cd "$dest_dir"
-pipenv install > /dev/null
+pipenv install --pre > /dev/null
 echo "Installed Python dependencies"
 
 sudo install -m644 rustbot.service /usr/local/lib/systemd/system/rustbot.service
