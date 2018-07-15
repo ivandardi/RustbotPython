@@ -14,14 +14,20 @@ class MemberID(commands.Converter):
             try:
                 return int(argument, base=10)
             except ValueError:
-                raise commands.BadArgument(f"{argument} is not a valid member or member ID.") from None
+                raise commands.BadArgument(
+                    f"{argument} is not a valid member or member ID."
+                ) from None
         else:
-            can_execute = ctx.author.id == ctx.bot.owner_id or \
-                          ctx.author == ctx.guild.owner or \
-                          ctx.author.top_role > m.top_role
+            can_execute = (
+                ctx.author.id == ctx.bot.owner_id
+                or ctx.author == ctx.guild.owner
+                or ctx.author.top_role > m.top_role
+            )
 
             if not can_execute:
-                raise commands.BadArgument('You cannot do this action on this user due to role hierarchy.')
+                raise commands.BadArgument(
+                    "You cannot do this action on this user due to role hierarchy."
+                )
         return m.id
 
 
@@ -56,12 +62,12 @@ class Moderation:
 
     async def __error(self, ctx: commands.Context, error):
         await ctx.message.clear_reactions()
-        await ctx.message.add_reaction('❌')
+        await ctx.message.add_reaction("❌")
 
         if isinstance(error, discord.Forbidden):
-            await ctx.send(f'The bot does not have permissions to do that! {error}')
+            await ctx.send(f"The bot does not have permissions to do that! {error}")
         if isinstance(error, discord.HTTPException):
-            await ctx.send(f'It failed! {error}')
+            await ctx.send(f"It failed! {error}")
 
     async def __before_invoke(self, ctx: commands.Context):
         if self.modlog_channel:
@@ -70,10 +76,10 @@ class Moderation:
         self.modlog_channel = self.bot.get_channel(id=274214329073795074)
 
         if not self.modlog_channel:
-            raise RuntimeError('Failed to get modlog channel!')
+            raise RuntimeError("Failed to get modlog channel!")
 
     async def __after_invoke(self, ctx: commands.Context):
-        await ctx.message.add_reaction('👌')
+        await ctx.message.add_reaction("👌")
 
         try:
             action = ctx.action
@@ -83,7 +89,10 @@ class Moderation:
             pass
 
     async def __local_check(self, ctx: commands.Context):
-        return any(role.name in ('Admin', 'Moderator', 'Bot Admin') for role in ctx.author.roles)
+        return any(
+            role.name in ("Admin", "Moderator", "Bot Admin")
+            for role in ctx.author.roles
+        )
 
     @commands.command()
     @commands.guild_only()
@@ -97,18 +106,16 @@ class Moderation:
         Bot Admin role.
         """
 
-        ctx.action = ModerationAction(
-            name='Kick',
-            reason=reason,
-            member=member,
-        )
+        ctx.action = ModerationAction(name="Kick", reason=reason, member=member)
 
         await ctx.guild.kick(discord.Object(id=member), reason=reason)
 
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx: commands.Context, member: MemberID, days: int, *, reason: str):
+    async def ban(
+        self, ctx: commands.Context, member: MemberID, days: int, *, reason: str
+    ):
         """Bans a member from the server.
 
         In order for this to work, the bot must have Ban Member permissions.
@@ -117,18 +124,18 @@ class Moderation:
         Bot Admin role.
         """
 
-        ctx.action = ModerationAction(
-            name='Ban',
-            reason=reason,
-            member=member,
-        )
+        ctx.action = ModerationAction(name="Ban", reason=reason, member=member)
 
-        await ctx.guild.ban(discord.Object(id=member), reason=reason, delete_message_days=days)
+        await ctx.guild.ban(
+            discord.Object(id=member), reason=reason, delete_message_days=days
+        )
 
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
-    async def softban(self, ctx: commands.Context, member: MemberID, days: int, *, reason: str):
+    async def softban(
+        self, ctx: commands.Context, member: MemberID, days: int, *, reason: str
+    ):
         """Soft bans a member from the server.
 
         A softban is basically banning the member from the server but
@@ -139,11 +146,7 @@ class Moderation:
         the Bot Admin role. Note that the bot must have the permission as well.
         """
 
-        ctx.action = ModerationAction(
-            name='Softban',
-            reason=reason,
-            member=member,
-        )
+        ctx.action = ModerationAction(name="Softban", reason=reason, member=member)
 
         obj = discord.Object(id=member)
         await ctx.guild.ban(obj, reason=reason, delete_message_days=days)
@@ -163,14 +166,12 @@ class Moderation:
         the Bot Admin role. Note that the bot must have the permission as well.
         """
 
-        previous_reason = ''
+        previous_reason = ""
         if member.reason:
             previous_reason = f'\nUser was previously banned for "{member.reason}".'
 
         ctx.action = ModerationAction(
-            name='Unban',
-            reason=f'{reason}{previous_reason}',
-            member=member.user,
+            name="Unban", reason=f"{reason}{previous_reason}", member=member.user
         )
 
         await ctx.guild.unban(member.user, reason=reason)
@@ -180,11 +181,7 @@ class Moderation:
     async def warn(self, ctx: commands.Context, member: discord.Member, *, reason: str):
         """Warns a member."""
 
-        ctx.action = ModerationAction(
-            name='Warn',
-            reason=reason,
-            member=member,
-        )
+        ctx.action = ModerationAction(name="Warn", reason=reason, member=member)
 
     @commands.command()
     @commands.guild_only()
@@ -192,19 +189,21 @@ class Moderation:
         """Deletes up to 100 messages in the current channel."""
 
         deleted = await ctx.channel.purge(limit=limit)
-        await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
+        await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
 
     async def make_modlog_entry(self, ctx: commands.Context, action: ModerationAction):
         async for m in self.modlog_channel.history(limit=1):
             action_id = int(next(iter(m.content.split()))) + 1
 
-        msg = '\n\n'.join([
-            f'{action_id} | **{action.name}**',
-            f'**User**\n{action.member.mention} ({str(action.member)} {action.member.id})',
-            f'**Reason**\n{action.reason}',
-            f'**Responsible Moderator**\n{ctx.author.mention} (ID: {ctx.author.id})',
-            f'**Timestamp**\n{ctx.message.created_at}',
-        ])
+        msg = "\n\n".join(
+            [
+                f"{action_id} | **{action.name}**",
+                f"**User**\n{action.member.mention} ({str(action.member)} {action.member.id})",
+                f"**Reason**\n{action.reason}",
+                f"**Responsible Moderator**\n{ctx.author.mention} (ID: {ctx.author.id})",
+                f"**Timestamp**\n{ctx.message.created_at}",
+            ]
+        )
 
         return msg
 

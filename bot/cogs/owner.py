@@ -20,7 +20,7 @@ class Owner:
         """Changes the bot's status. Can only be used by the owner."""
         await self.bot.change_presence(activity=discord.Game(name=status))
 
-    @commands.command(name='reload')
+    @commands.command(name="reload")
     @commands.is_owner()
     async def _reload(self, ctx, *, ext: str = None):
         """Reloads a module. Can only be used by the owner."""
@@ -35,12 +35,14 @@ class Owner:
 
     @_reload.error
     async def meta_error(self, error, ctx: commands.Context):
-        await ctx.message.add_reaction('❌')
-        await ctx.message.edit(content=f'Failed to execute command!\n{type(error).__name__}: {error}')
+        await ctx.message.add_reaction("❌")
+        await ctx.message.edit(
+            content=f"Failed to execute command!\n{type(error).__name__}: {error}"
+        )
 
     @_reload.after_invoke
     async def ok_hand(self, ctx: commands.Context):
-        await ctx.message.add_reaction('👌')
+        await ctx.message.add_reaction("👌")
 
 
 def setup(bot):
