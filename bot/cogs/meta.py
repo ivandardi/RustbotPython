@@ -107,35 +107,6 @@ class Meta:
         await ctx.message.add_reaction("👌")
 
     @commands.command()
-    @commands.guild_only()
-    async def userinfo(self, ctx: commands.Context, *, member: discord.Member = None):
-        """Shows info about a member.
-        This cannot be used in private messages. If you don't specify
-        a member then the info returned will be yours.
-        """
-        if member is None:
-            member = ctx.author
-
-        e = discord.Embed()
-
-        roles = [role.name.replace("@", "@\u200b") for role in member.roles]
-
-        e.set_author(
-            name=str(member), icon_url=member.avatar_url or member.default_avatar_url
-        )
-        e.set_footer(text="Member since").timestamp = member.joined_at
-        e.add_field(name="ID", value=member.id)
-        e.add_field(name="Current Name", value=member.display_name)
-        e.add_field(name="Created", value=member.created_at)
-        e.add_field(name="Roles", value=", ".join(roles))
-        e.colour = member.colour
-
-        if member.avatar:
-            e.set_image(url=member.avatar_url)
-
-        await ctx.send(embed=e)
-
-    @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=100):
         """Deletes the bot's messages up to the most 100 recent messages."""
 
