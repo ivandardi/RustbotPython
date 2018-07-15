@@ -51,10 +51,10 @@ class RustBot(commands.Bot):
                 print(f"Failed to load extension {extension}\n{type(e).__name__}: {e}")
 
     async def on_ready(self):
-        print("Logged in as")
-        print(self.user.name)
-        print(self.user.id)
+        print("Logged in as", self.user)
         print("------")
+
+        await self.bot.change_presence(game=discord.Game(name="?help"))
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):
