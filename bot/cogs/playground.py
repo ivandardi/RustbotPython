@@ -57,7 +57,7 @@ class Playground:
             )
 
             async with self.session.post(
-                "https://play.integer32.com/execute", data=payload
+                    "https://play.integer32.com/execute", data=payload
             ) as r:
                 if r.status != 200:
                     raise commands.CommandError(
@@ -85,7 +85,7 @@ class Playground:
         headers = {"Accept": "application/vnd.github.v3+json"}
 
         async with self.session.post(
-            "https://api.github.com/gists", data=data, headers=headers
+                "https://api.github.com/gists", data=data, headers=headers
         ) as r:
             response = await r.json()
 
@@ -99,10 +99,6 @@ class Playground:
             await ctx.send(CodeBlock.missing_error)
         if isinstance(error, commands.CommandError):
             await ctx.send(str(error))
-        await ctx.message.add_reaction("❌")
-
-    async def __after_invoke(self, ctx: commands.Context):
-        await ctx.message.add_reaction(self.bot.rustok)
 
 
 def setup(bot):

@@ -74,6 +74,13 @@ class RustBot(commands.Bot):
         if not isinstance(error, commands.CommandNotFound):
             return await ctx.send(error)
 
+    async def __after_invoke(self, ctx: commands.Context):
+        await ctx.message.add_reaction(self.rustok)
+
+    async def __error(self, ctx: commands.Context, error):
+        await ctx.message.clear_reactions()
+        await ctx.message.add_reaction("❌")
+
 
 def main():
     bot = RustBot(
