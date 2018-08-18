@@ -39,7 +39,6 @@ class RustBot(commands.Bot):
         self.uptime = datetime.datetime.utcnow()
         self.initial_extensions = [
             "bot.cogs.meta",
-            "bot.cogs.moderation",
             "bot.cogs.owner",
             "bot.cogs.playground",
         ]
