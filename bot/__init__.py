@@ -71,8 +71,6 @@ class RustBot(commands.Bot):
         log.error(f"Command error in %s:\n%s", ctx.command, tb)
         if isinstance(error, commands.CheckFailure):
             return await ctx.send(f"You aren't allowed to run this command!")
-        if not isinstance(error, commands.CommandNotFound):
-            return await ctx.send(error)
 
     async def __after_invoke(self, ctx: commands.Context):
         await ctx.message.add_reaction(self.rustok)
