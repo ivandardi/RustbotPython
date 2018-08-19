@@ -33,17 +33,6 @@ class Owner:
                 self.bot.unload_extension(m)
                 self.bot.load_extension(m)
 
-    @_reload.error
-    async def meta_error(self, error, ctx: commands.Context):
-        await ctx.message.add_reaction("❌")
-        await ctx.message.edit(
-            content=f"Failed to execute command!\n{type(error).__name__}: {error}"
-        )
-
-    @_reload.after_invoke
-    async def ok_hand(self, ctx: commands.Context):
-        await ctx.message.add_reaction(self.emoji_rustok)
-
 
 def setup(bot):
     bot.add_cog(Owner(bot))

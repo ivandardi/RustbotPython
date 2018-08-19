@@ -54,7 +54,7 @@ class RustBot(commands.Bot):
         print("Logged in as", self.user)
         print("------")
 
-        await self.change_presence(game=discord.Game(name="?help"))
+        await self.change_presence(activity=discord.Game(name="?help"))
         self.emoji_rustok = discord.utils.get(self.emojis, name="rustOk")
 
     async def on_command(self, ctx):
@@ -63,8 +63,11 @@ class RustBot(commands.Bot):
         else:
             destination = f"#{ctx.channel} ({ctx.guild})"
         log.info(f"{ctx.author} in {destination}: {ctx.message.content}")
+        await ctx.message.add_reaction(self.rustok)
 
     async def on_command_error(self, ctx: commands.Context, error):
+        await ctx.message.clear_reactions()
+        await ctx.message.add_reaction("❌")
         tb = "".join(
             traceback.format_exception(type(error), error, error.__traceback__)
         )
@@ -72,18 +75,12 @@ class RustBot(commands.Bot):
         if isinstance(error, commands.CheckFailure):
             return await ctx.send(f"You aren't allowed to run this command!")
 
-    async def __after_invoke(self, ctx: commands.Context):
-        await ctx.message.add_reaction(self.rustok)
-
-    async def __error(self, ctx: commands.Context, error):
-        await ctx.message.clear_reactions()
-        await ctx.message.add_reaction("❌")
-
 
 def main():
     bot = RustBot(
         command_prefix=commands.when_mentioned_or(
             "?",
+            "🦀",
             "hey ferris can you ",
             "hey ferris, can you ",
             "hey fewwis can you ",
