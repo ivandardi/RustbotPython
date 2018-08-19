@@ -33,7 +33,7 @@ class Meta:
     @commands.guild_only()
     async def rustify(self, ctx: commands.Context, *members: discord.Member):
         """Adds the Rustacean role to a member.
-        Takes in a list of member mentions and/or IDs.
+        Takes in a space-separated list of member mentions and/or IDs.
         """
         if not self.rustacean_role:
             self.rustacean_role = discord.utils.get(
@@ -44,9 +44,8 @@ class Meta:
             return
         for member in members:
             await member.add_roles(
-                self.rustacean_role, reason="You have been rusted! owo"
+                self.rustacean_role, reason=f"You have been rusted by {ctx.author}! owo"
             )
-        await ctx.message.add_reaction(self.bot.emoji_rustok)
 
     @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=100):
