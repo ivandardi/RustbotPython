@@ -63,7 +63,7 @@ class RustBot(commands.Bot):
         else:
             destination = f"#{ctx.channel} ({ctx.guild})"
         log.info(f"{ctx.author} in {destination}: {ctx.message.content}")
-        await ctx.message.add_reaction(self.rustok)
+        await ctx.message.add_reaction(self.emoji_rustok)
 
     async def on_command_error(self, ctx: commands.Context, error):
         await ctx.message.clear_reactions()
