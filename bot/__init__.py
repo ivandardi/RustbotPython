@@ -81,10 +81,15 @@ def main():
         command_prefix=commands.when_mentioned_or(
             "?",
             "🦀",
+            "🦀 ",
             "hey ferris can you ",
+            "hey ferris can you please ",
             "hey ferris, can you ",
+            "hey ferris, can you please",
             "hey fewwis can you ",
+            "hey fewwis can you please",
             "hey fewwis, can you ",
+            "hey fewwis, can you please",
         )
     )
 
