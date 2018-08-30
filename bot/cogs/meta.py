@@ -39,6 +39,9 @@ class Meta:
             self.rustacean_role = discord.utils.get(
                 ctx.guild.roles, id=319953207193501696
             )
+        if not self.bot.emoji_rustok:
+            self.bot.log.info("Loading the rustOk emoji...")
+            self.bot.emoji_rustok = discord.utils.get(self.bot.emojis, name="rustOk")
         if self.rustacean_role not in ctx.author.roles:
             return await ctx.message.add_reaction("❌")
         for member in members:

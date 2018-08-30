@@ -43,6 +43,7 @@ class RustBot(commands.Bot):
             "bot.cogs.playground",
         ]
         self.emoji_rustok = None
+        self.log = log
 
         for extension in self.initial_extensions:
             try:
@@ -56,6 +57,10 @@ class RustBot(commands.Bot):
 
         await self.change_presence(activity=discord.Game(name="??help"))
         self.emoji_rustok = discord.utils.get(self.emojis, name="rustOk")
+        if self.emoji_rustok:
+            log.info("Emoji rustOk loaded!")
+        else:
+            log.info("Emoji rustOk not loaded! D:")
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):
