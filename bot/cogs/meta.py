@@ -40,12 +40,12 @@ class Meta:
                 ctx.guild.roles, id=319953207193501696
             )
         if self.rustacean_role not in ctx.author.roles:
-            await ctx.message.add_reaction("❌")
-            return
+            return await ctx.message.add_reaction("❌")
         for member in members:
             await member.add_roles(
                 self.rustacean_role, reason=f"You have been rusted by {ctx.author}! owo"
             )
+        await ctx.message.add_reaction(self.bot.emoji_rustok)
 
     @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=100):
@@ -58,6 +58,13 @@ class Meta:
 
         deleted = await ctx.channel.purge(limit=limit, check=is_me)
         await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
+
+    async def __after_invoke(self, ctx: commands.Context):
+        await ctx.message.add_reaction(self.bot.emoji_rustok)
+
+    async def __error(self, ctx: commands.Context, error):
+        await ctx.message.clear_reactions()
+        await ctx.message.add_reaction("❌")
 
 
 def setup(bot):
