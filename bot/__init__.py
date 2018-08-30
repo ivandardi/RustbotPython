@@ -77,7 +77,7 @@ class RustBot(commands.Bot):
 def main():
     bot = RustBot(
         command_prefix=commands.when_mentioned_or(
-            "??",
+            "?",
             "🦀",
             "🦀 ",
             "hey ferris can you ",
