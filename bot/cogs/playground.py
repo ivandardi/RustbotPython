@@ -32,7 +32,7 @@ class CodeSection:
             raise commands.BadArgument(self.missing_error)
 
         if codeblock:
-            self.source = code.split('\n')[1].rstrip("`")
+            self.source = "\n".join(code.split('\n')[1:]).rstrip("`")
         else:
             self.source = code.strip("`")
 
