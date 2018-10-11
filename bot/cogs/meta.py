@@ -37,7 +37,7 @@ class Meta:
         """
         if not self.rustacean_role:
             self.rustacean_role = discord.utils.get(
-                ctx.guild.roles, id=319953207193501696
+                ctx.guild.roles, id=319_953_207_193_501_696
             )
         if not self.bot.emoji_rustok:
             self.bot.log.info("Loading the rustOk emoji...")
