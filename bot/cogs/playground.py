@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class CodeBlock:
-    missing_error = "Missing code block. Please use the following markdown\n\\`\\`\\`language\ncode here\n\\`\\`\\`"
+    missing_error = "Missing code block. Please use the following markdown\n\\`\\`\\`rust\ncode here\n\\`\\`\\`"
 
     def __init__(self, argument):
         try:
@@ -21,6 +21,21 @@ class CodeBlock:
             raise commands.BadArgument(self.missing_error)
 
         self.source = code.rstrip("`")
+
+
+class CodeSection:
+    missing_error = "Missing code section. Please use the following markdown\n\\`code here\\`\nor\n\\`\\`\\`rust\ncode here\n\\`\\`\\`"
+
+    def __init__(self, code):
+        codeblock = code.startswith("```") and code.endswith("```")
+        codesection = code.startswith("`") and code.endswith("`")
+        if not codesection and not codeblock:
+            raise commands.BadArgument(self.missing_error)
+
+        if codeblock:
+            self.source = "\n".join(code.split("\n")[1:]).rstrip("`")
+        else:
+            self.source = code.strip("`")
 
 
 class Playground:
@@ -45,11 +60,22 @@ class Playground:
     async def play(self, ctx: commands.Context, *, code: CodeBlock):
         """Evaluates Rust code. Exactly equal to https://play.integer32.com/"""
 
+        await self.query_playground(ctx, code.source)
+
+    @commands.command()
+    async def eval(self, ctx: commands.Context, *, code: CodeSection):
+        """Evaluates Rust code and debug prints the results. Exactly equal to https://play.integer32.com/"""
+
+        await self.query_playground(
+            ctx, 'fn main(){println!("{:?}",{' + code.source + "});}"
+        )
+
+    async def query_playground(self, ctx: commands.Context, source):
         async with ctx.typing():
             payload = json.dumps(
                 {
                     "channel": "nightly",
-                    "code": code.source,
+                    "code": source,
                     "crateType": "bin",
                     "mode": "debug",
                     "tests": False,
@@ -57,7 +83,7 @@ class Playground:
             )
 
             async with self.session.post(
-                    "https://play.integer32.com/execute", data=payload
+                "https://play.integer32.com/execute", data=payload
             ) as r:
                 if r.status != 200:
                     raise commands.CommandError(
@@ -68,7 +94,14 @@ class Playground:
                 if "error" in response:
                     raise commands.CommandError(response["error"])
 
-                full_response = response["stderr"] + response["stdout"]
+                stderr = response["stderr"]
+                stdout = response["stdout"]
+
+                full_response = (
+                    stdout
+                    if len(stderr.split("\n")) <= 4
+                    else "\n".join(stderr.split("\n")[1:-7])
+                )
                 len_response = len(full_response)
                 if len_response < 1990:
                     msg = f"```rs\n{full_response}```"
@@ -85,7 +118,7 @@ class Playground:
         headers = {"Accept": "application/vnd.github.v3+json"}
 
         async with self.session.post(
-                "https://api.github.com/gists", data=data, headers=headers
+            "https://api.github.com/gists", data=data, headers=headers
         ) as r:
             response = await r.json()
 
