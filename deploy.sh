@@ -5,7 +5,7 @@ git fetch --all
 git reset --hard origin/master
 
 repo_dir="$(dirname "$0")"
-dest_dir=/home/ferris/prod
+dest_dir=/home/melo/prod
 
 sudo rm -rf "$dest_dir"
 mkdir -p "$dest_dir"

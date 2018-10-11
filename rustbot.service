@@ -3,11 +3,11 @@ Description=RustBot (aka Ferris) for the Rust Programming Guild
 After=network.target
 
 [Service]
-EnvironmentFile=/home/ferris/env
+EnvironmentFile=/home/melo/env
 Type=simple
-User=ferris
+User=melo
 ExecStart=/usr/bin/env python3.6 -m bot
-WorkingDirectory=/home/ferris/prod
+WorkingDirectory=/home/melo/prod
 Restart=always
 RestartSec=600
 
