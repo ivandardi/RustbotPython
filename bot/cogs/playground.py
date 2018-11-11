@@ -1,11 +1,13 @@
 import json
 import logging
+import re
 
 import aiohttp
 import discord
 from discord.ext import commands
 
 log = logging.getLogger(__name__)
+err_regex = re.compile(r"^error(\[.*\])*:", re.MULTILINE)
 
 
 class CodeBlock:
@@ -63,14 +65,21 @@ class Playground:
         await self.query_playground(ctx, code.source)
 
     @commands.command()
+    async def playwarn(self, ctx: commands.Context, *, code: CodeBlock):
+        """Evaluates Rust code and outputs generated warnings. Exactly equal to https://play.integer32.com/"""
+
+        await self.query_playground(ctx, code.source, warnings=True)
+
+    @commands.command()
     async def eval(self, ctx: commands.Context, *, code: CodeSection):
         """Evaluates Rust code and debug prints the results. Exactly equal to https://play.integer32.com/"""
-
+        comment_index = code.source.find("//")
+        end_idx = comment_index if comment_index != -1 else len(code.source)
         await self.query_playground(
-            ctx, 'fn main(){println!("{:?}",{' + code.source + "});}"
+            ctx, 'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
         )
 
-    async def query_playground(self, ctx: commands.Context, source):
+    async def query_playground(self, ctx: commands.Context, source, warnings=None):
         async with ctx.typing():
             payload = json.dumps(
                 {
@@ -99,11 +108,15 @@ class Playground:
 
                 full_response = (
                     stdout
-                    if len(stderr.split("\n")) <= 4
-                    else "\n".join(stderr.split("\n")[1:-7])
+                    if err_regex.search(stderr) is None
+                    and not (warnings is not None and len(stderr) >= 4)
+                    else "\n".join(stderr.split("\n")[1:-7]) + "\n\n" + stdout
                 )
                 len_response = len(full_response)
-                if len_response < 1990:
+                if len_response == 0:
+                    msg = "``` ```"
+                elif len_response < 1990:
+                    full_response = full_response.replace("```", "  ̀  ̀  ̀")
                     msg = f"```rs\n{full_response}```"
                 elif 1990 <= len_response <= 5000:
                     msg = await self.get_gist(full_response)
