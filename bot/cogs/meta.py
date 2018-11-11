@@ -62,6 +62,12 @@ class Meta:
         deleted = await ctx.channel.purge(limit=limit, check=is_me)
         await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
 
+    @commands.command()
+    async def source(self, ctx: commands.Context):
+        """Links to the bot GitHub repo."""
+
+        await ctx.send("https://github.com/ivandardi/RustbotPython")
+
     async def __after_invoke(self, ctx: commands.Context):
         await ctx.message.add_reaction(self.bot.emoji_rustok)
 

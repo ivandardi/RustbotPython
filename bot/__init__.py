@@ -55,7 +55,7 @@ class RustBot(commands.Bot):
         print("Logged in as", self.user)
         print("------")
 
-        await self.change_presence(activity=discord.Game(name="??help"))
+        await self.change_presence(activity=discord.Game(name="?help"))
         self.emoji_rustok = discord.utils.get(self.emojis, name="rustOk")
         if self.emoji_rustok:
             log.info("Emoji rustOk loaded!")
