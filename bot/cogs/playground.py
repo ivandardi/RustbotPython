@@ -82,21 +82,25 @@ class Playground:
         )
 
     def parse_args(self, args):
-        args = args.replace('\n`', ' `').split(' ')
+        args = args.replace("\n`", " `").split(" ")
         if args[0].startswith("--"):
             mode = args[0][2:]
             mode.strip()
             print("aaaaaa", mode)
-            code = ' '.join(args[1:])
+            code = " ".join(args[1:])
             if mode != "release" and mode != "debug":
-                raise commands.BadArgument("Bad compile mode. Valid options are `--release` and `--debug`")
-            
+                raise commands.BadArgument(
+                    "Bad compile mode. Valid options are `--release` and `--debug`"
+                )
+
             return (mode, CodeSection(code))
         else:
-            code = ' '.join(args[0:])
+            code = " ".join(args[0:])
             return (None, CodeSection(code))
 
-    async def query_playground(self, ctx: commands.Context, mode, source, warnings=None):
+    async def query_playground(
+        self, ctx: commands.Context, mode, source, warnings=None
+    ):
         async with ctx.typing():
             payload = json.dumps(
                 {
