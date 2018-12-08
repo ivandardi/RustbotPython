@@ -41,11 +41,12 @@ class CodeSection:
 
 
 class Playground:
-    """Evaluates Rust code.
+    """Evaluates Rust code with an optional compilation mode.
+    Defaults to debug.
 
     Usage:
 
-    ?play ```rs
+    ?play (--release|--debug) ```rs
     <your Rust code here>
     ```
 
