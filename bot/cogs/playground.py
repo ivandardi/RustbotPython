@@ -5,7 +5,6 @@ import re
 import aiohttp
 import discord
 from discord.ext import commands
-from typing import Optional
 
 log = logging.getLogger(__name__)
 err_regex = re.compile(r"^error(\[.*\])*:", re.MULTILINE)
