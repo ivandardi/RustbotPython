@@ -41,11 +41,12 @@ class CodeSection:
 
 
 class Playground:
-    """Evaluates Rust code.
+    """Evaluates Rust code with an optional compilation mode.
+    Defaults to debug.
 
     Usage:
 
-    ?play ```rs
+    ?play (--release|--debug) ```rs
     <your Rust code here>
     ```
 
@@ -59,34 +60,54 @@ class Playground:
         self.session.close()
 
     @commands.command()
-    async def play(self, ctx: commands.Context, *, code: CodeBlock):
+    async def play(self, ctx: commands.Context, *, arg):
         """Evaluates Rust code. Exactly equal to https://play.integer32.com/"""
-
-        await self.query_playground(ctx, code.source)
+        (mode, code) = self.parse_args(arg)
+        await self.query_playground(ctx, mode, code.source)
 
     @commands.command()
-    async def playwarn(self, ctx: commands.Context, *, code: CodeBlock):
+    async def playwarn(self, ctx: commands.Context, *, arg):
         """Evaluates Rust code and outputs generated warnings. Exactly equal to https://play.integer32.com/"""
-
-        await self.query_playground(ctx, code.source, warnings=True)
+        (mode, code) = self.parse_args(arg)
+        await self.query_playground(ctx, mode, code.source, warnings=True)
 
     @commands.command()
-    async def eval(self, ctx: commands.Context, *, code: CodeSection):
+    async def eval(self, ctx: commands.Context, *, arg):
         """Evaluates Rust code and debug prints the results. Exactly equal to https://play.integer32.com/"""
+        (mode, code) = self.parse_args(arg)
         comment_index = code.source.find("//")
         end_idx = comment_index if comment_index != -1 else len(code.source)
         await self.query_playground(
-            ctx, 'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
+            ctx, mode, 'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
         )
 
-    async def query_playground(self, ctx: commands.Context, source, warnings=None):
+    def parse_args(self, args):
+        args = args.replace("\n`", " `").split(" ")
+        if args[0].startswith("--"):
+            mode = args[0][2:]
+            mode.strip()
+            print("aaaaaa", mode)
+            code = " ".join(args[1:])
+            if mode != "release" and mode != "debug":
+                raise commands.BadArgument(
+                    "Bad compile mode. Valid options are `--release` and `--debug`"
+                )
+
+            return (mode, CodeSection(code))
+        else:
+            code = " ".join(args[0:])
+            return (None, CodeSection(code))
+
+    async def query_playground(
+        self, ctx: commands.Context, mode, source, warnings=None
+    ):
         async with ctx.typing():
             payload = json.dumps(
                 {
                     "channel": "nightly",
                     "code": source,
                     "crateType": "bin",
-                    "mode": "debug",
+                    "mode": mode if mode is not None else "debug",
                     "tests": False,
                 }
             )
@@ -110,7 +131,8 @@ class Playground:
                     stdout
                     if err_regex.search(stderr) is None
                     and not (warnings is not None and len(stderr) >= 4)
-                    else "\n".join(stderr.split("\n")[1:-7]) + "\n\n" + stdout
+                    and not "panicked" in stderr
+                    else "\n".join(stderr.split("\n")[1:]) + "\n\n" + stdout
                 )
                 len_response = len(full_response)
                 if len_response == 0:
