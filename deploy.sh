@@ -13,8 +13,9 @@ cp -a "$repo_dir" "$dest_dir"
 echo "Installed source code to '$dest_dir'"
 
 cd "$dest_dir"
-python3.6 -m venv venv > /dev/null
-venv/bin/python3.6 -m pip install -r requirements.txt > /dev/null
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt > /dev/null
 echo "Installed Python dependencies"
 
 sudo chown -R melo:melo "$dest_dir"
