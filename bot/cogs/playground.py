@@ -86,17 +86,16 @@ class Playground:
         if args[0].startswith("--"):
             mode = args[0][2:]
             mode.strip()
-            print("aaaaaa", mode)
             code = " ".join(args[1:])
             if mode != "release" and mode != "debug":
                 raise commands.BadArgument(
                     "Bad compile mode. Valid options are `--release` and `--debug`"
                 )
 
-            return (mode, CodeSection(code))
+            return mode, CodeSection(code)
         else:
             code = " ".join(args[0:])
-            return (None, CodeSection(code))
+            return None, CodeSection(code)
 
     async def query_playground(
         self, ctx: commands.Context, mode, source, warnings=None
@@ -131,7 +130,7 @@ class Playground:
                     stdout
                     if err_regex.search(stderr) is None
                     and not (warnings is not None and len(stderr) >= 4)
-                    and not "panicked" in stderr
+                    and "panicked" not in stderr
                     else "\n".join(stderr.split("\n")[1:]) + "\n\n" + stdout
                 )
                 len_response = len(full_response)
