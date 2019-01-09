@@ -40,7 +40,7 @@ class Meta:
             fmt = "{d}d " + fmt
 
         await ctx.send(
-            content="Uptime: **{}**".format(
+            content="Uptime: {}".format(
                 fmt.format(d=days, h=hours, m=minutes, s=seconds)
             )
         )
