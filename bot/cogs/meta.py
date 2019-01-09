@@ -56,6 +56,9 @@ class Meta:
         You can specify how many messages to look for.
         """
 
+        if limit > 100:
+            limit = 100
+
         def is_me(m):
             return m.author.id == self.bot.user.id
 
