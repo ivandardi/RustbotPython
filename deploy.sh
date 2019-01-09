@@ -14,8 +14,7 @@ echo "Installed source code to '$dest_dir'"
 
 cd "$dest_dir"
 python3.6 -m venv venv > /dev/null
-source venv/bin/activate > /dev/null
-pip install -r requirements.txt > /dev/null
+venv/bin/python3.6 -m pip install -r requirements.txt > /dev/null
 echo "Installed Python dependencies"
 
 sudo chown -R melo:melo "$dest_dir"
