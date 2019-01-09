@@ -33,6 +33,8 @@ class Owner:
                 self.bot.unload_extension(m)
                 self.bot.load_extension(m)
 
+        await ctx.message.add_reaction(self.bot.emoji_rustok)
+
 
 def setup(bot):
     bot.add_cog(Owner(bot))
