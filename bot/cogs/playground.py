@@ -104,6 +104,7 @@ class Playground:
             payload = json.dumps(
                 {
                     "channel": "nightly",
+                    "edition": "2018",
                     "code": source,
                     "crateType": "bin",
                     "mode": mode if mode is not None else "debug",
