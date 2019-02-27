@@ -44,6 +44,7 @@ class RustBot(commands.Bot):
         ]
         self.emoji_rustok = None
         self.log = log
+        self.invite_message = os.environ.get("INVITE_DISCORD", None)
 
         for extension in self.initial_extensions:
             try:
@@ -61,6 +62,11 @@ class RustBot(commands.Bot):
             log.info("Emoji rustOk loaded!")
         else:
             log.info("Emoji rustOk not loaded! D:")
+
+        if self.invite_message is None:
+            log.info("No invite message was provided.")
+        else:
+            log.info("Thanks for the invite message c:")
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):

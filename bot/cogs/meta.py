@@ -45,6 +45,18 @@ class Meta:
             )
         )
 
+    @commands.command()
+    async def invite(self, ctx: commands.Context):
+        """Replies with an invite message, e.g. invite URL.
+        If a message was not provided during the bot's init,
+        direct the user to the #informational channel.
+        """
+
+        if self.bot.invite_message is not None:
+            await ctx.send(self.bot.invite_message)
+        else:
+            await ctx.send("<#273547351929520129>")
+
     @commands.command(aliases=["wustify"])
     @commands.guild_only()
     async def rustify(self, ctx: commands.Context, *members: discord.Member):
