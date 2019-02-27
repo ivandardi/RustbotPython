@@ -47,15 +47,13 @@ class Meta:
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
-        """Replies with an invite message, e.g. invite URL.
-        If a message was not provided during the bot's init,
-        direct the user to the #informational channel.
+        """Points the user to the #informational channel,
+        which contains invite links.
         """
 
-        if self.bot.invite_message is not None:
-            await ctx.send(self.bot.invite_message)
-        else:
-            await ctx.send("<#273547351929520129>")
+        channel = "<#273547351929520129>"
+        link = "https://discordapp.com/channels/273534239310479360/273547351929520129/288101969980162049"
+        await ctx.send(f"Invite links are provided in {channel}\n{link}")
 
     @commands.command(aliases=["wustify"])
     @commands.guild_only()
