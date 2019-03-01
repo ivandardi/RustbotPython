@@ -45,6 +45,16 @@ class Meta:
             )
         )
 
+    @commands.command()
+    async def invite(self, ctx: commands.Context):
+        """Points the user to the #informational channel,
+        which contains invite links.
+        """
+
+        channel = "<#273547351929520129>"
+        link = "https://discordapp.com/channels/273534239310479360/273547351929520129/288101969980162049"
+        await ctx.send(f"Invite links are provided in {channel}\n{link}")
+
     @commands.command(aliases=["wustify"])
     @commands.guild_only()
     async def rustify(self, ctx: commands.Context, *members: discord.Member):
