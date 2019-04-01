@@ -81,6 +81,12 @@ class Playground:
             ctx, mode, 'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
         )
 
+    @commands.command()
+    async def go(self, ctx: commands.Context):
+        """Evaluates Go code"""
+        
+        await ctx.send("No")
+
     def parse_args(self, args):
         args = args.replace("\n`", " `").split(" ")
         if args[0].startswith("--"):
