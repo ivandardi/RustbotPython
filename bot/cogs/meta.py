@@ -21,10 +21,6 @@ class Meta:
                 ctx.guild.roles, id=468_114_715_210_678_272
             )
 
-        if not self.bot.emoji_rustok:
-            self.bot.log.info("Loading the rustOk emoji...")
-            self.bot.emoji_rustok = discord.utils.get(self.bot.emojis, name="rustOk")
-
     @commands.command()
     async def uptime(self, ctx: commands.Context):
         """Tells you how long the bot has been up for."""
