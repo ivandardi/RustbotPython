@@ -84,7 +84,6 @@ class Playground:
     @commands.command()
     async def go(self, ctx: commands.Context):
         """Evaluates Go code"""
-        
         await ctx.send("No")
 
     def parse_args(self, args):

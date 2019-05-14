@@ -56,7 +56,8 @@ class Meta:
 
         for member in members:
             await member.add_roles(
-                self.bot.rustacean_role, reason=f"You have been rusted by {ctx.author}! owo"
+                self.bot.rustacean_role,
+                reason=f"You have been rusted by {ctx.author}! owo",
             )
 
         await ctx.message.add_reaction(self.bot.emoji_rustok)
