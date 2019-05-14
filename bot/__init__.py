@@ -30,9 +30,6 @@ def setup_logging():
     return logger
 
 
-log = setup_logging()
-
-
 class RustBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,7 +41,7 @@ class RustBot(commands.Bot):
         ]
         self.emoji_rustok = None
         self.rustacean_role = None
-        self.log = log
+        self.log = setup_logging()
 
         for extension in self.initial_extensions:
             try:
@@ -60,28 +57,30 @@ class RustBot(commands.Bot):
 
         self.emoji_rustok = discord.utils.get(self.emojis, name="rustOk")
         if self.emoji_rustok:
-            log.info("Emoji rustOk loaded!")
+            self.log.info("Emoji rustOk loaded!")
         else:
-            log.info("Emoji rustOk not loaded! D:")
+            self.log.info("Emoji rustOk not loaded! D:")
 
-        self.rustacean_role = discord.utils.get(ctx.guild.roles, id=319_953_207_193_501_696)
+        self.rustacean_role = discord.utils.get(
+            ctx.guild.roles, id=319_953_207_193_501_696
+        )
         if self.rustacean_role:
-            log.info("Rustacean role loaded!")
+            self.log.info("Rustacean role loaded!")
         else:
-            log.info("Rustacean role not loaded! D:")
+            self.log.info("Rustacean role not loaded! D:")
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):
             destination = f"#{ctx.channel}"
         else:
             destination = f"#{ctx.channel} ({ctx.guild})"
-        log.info(f"{ctx.author} in {destination}: {ctx.message.content}")
+        self.log.info(f"{ctx.author} in {destination}: {ctx.message.content}")
 
     async def on_command_error(self, ctx: commands.Context, error):
         tb = "".join(
             traceback.format_exception(type(error), error, error.__traceback__)
         )
-        log.error(f"Command error in %s:\n%s", ctx.command, tb)
+        self.log.error(f"Command error in %s:\n%s", ctx.command, tb)
         if isinstance(error, commands.CheckFailure):
             await ctx.message.add_reaction("❌")
             await ctx.send(f"You aren't allowed to run this command!")
@@ -96,8 +95,8 @@ def main():
     bot = RustBot(
         command_prefix=commands.when_mentioned_or(
             "?",
-            "\U1F980",
-            "\U1F980 ",
+            "\N{CRAB}",
+            "\N{CRAB} ",
             "hey ferris can you ",
             "hey ferris can you please ",
             "hey ferris, can you ",
@@ -111,7 +110,7 @@ def main():
 
     bot.run(os.environ["TOKEN_DISCORD"])
 
-    handlers = log.handlers[:]
+    handlers = bot.log.handlers[:]
     for hdlr in handlers:
         hdlr.close()
-        log.removeHandler(hdlr)
+        bot.log.removeHandler(hdlr)
