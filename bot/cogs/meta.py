@@ -60,9 +60,6 @@ class Meta:
 
         self._setup_commands(ctx)
 
-        if self.rustacean_role not in ctx.author.roles:
-            return await ctx.message.add_reaction("❌")
-
         for member in members:
             await member.add_roles(
                 self.rustacean_role, reason=f"You have been rusted by {ctx.author}! owo"
