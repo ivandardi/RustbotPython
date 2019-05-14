@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 
-class Meta:
+class Meta(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.unsafe_role = None
@@ -112,7 +112,7 @@ class Meta:
 
         await ctx.send("https://github.com/ivandardi/RustbotPython")
 
-    async def __error(self, ctx: commands.Context, error):
+    async def cog_command_error(self, ctx: commands.Context, error):
         await ctx.message.clear_reactions()
         await ctx.message.add_reaction("❌")
 

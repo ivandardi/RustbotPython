@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 
-class Owner:
+class Owner(commands.Cog):
     """Admin-only commands that make the bot dynamic."""
 
     def __init__(self, bot):
