@@ -43,6 +43,7 @@ class RustBot(commands.Bot):
             "bot.cogs.playground",
         ]
         self.emoji_rustok = None
+        self.rustacean_role = None
         self.log = log
 
         for extension in self.initial_extensions:
@@ -56,11 +57,18 @@ class RustBot(commands.Bot):
         print("------")
 
         await self.change_presence(activity=discord.Game(name="?help"))
+
         self.emoji_rustok = discord.utils.get(self.emojis, name="rustOk")
         if self.emoji_rustok:
             log.info("Emoji rustOk loaded!")
         else:
             log.info("Emoji rustOk not loaded! D:")
+
+        self.rustacean_role = discord.utils.get(ctx.guild.roles, id=319_953_207_193_501_696)
+        if self.rustacean_role:
+            log.info("Rustacean role loaded!")
+        else:
+            log.info("Rustacean role not loaded! D:")
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):
@@ -78,13 +86,18 @@ class RustBot(commands.Bot):
             await ctx.message.add_reaction("❌")
             await ctx.send(f"You aren't allowed to run this command!")
 
+    async def on_member_join(self, member: discord.Member):
+        await member.add_roles(
+            self.rustacean_role, reason=f"You have been automatically rusted! owo"
+        )
+
 
 def main():
     bot = RustBot(
         command_prefix=commands.when_mentioned_or(
             "?",
-            "🦀",
-            "🦀 ",
+            "\U1F980",
+            "\U1F980 ",
             "hey ferris can you ",
             "hey ferris can you please ",
             "hey ferris, can you ",

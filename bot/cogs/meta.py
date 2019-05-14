@@ -7,15 +7,9 @@ from discord.ext import commands
 class Meta:
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.rustacean_role = None
         self.unsafe_role = None
 
     def _setup_commands(self, ctx):
-        if not self.rustacean_role:
-            self.rustacean_role = discord.utils.get(
-                ctx.guild.roles, id=319_953_207_193_501_696
-            )
-
         if not self.unsafe_role:
             self.unsafe_role = discord.utils.get(
                 ctx.guild.roles, id=468_114_715_210_678_272
@@ -62,7 +56,7 @@ class Meta:
 
         for member in members:
             await member.add_roles(
-                self.rustacean_role, reason=f"You have been rusted by {ctx.author}! owo"
+                self.bot.rustacean_role, reason=f"You have been rusted by {ctx.author}! owo"
             )
 
         await ctx.message.add_reaction(self.bot.emoji_rustok)
