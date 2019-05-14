@@ -66,6 +66,11 @@ class Meta:
     async def unsafe(self, ctx: commands.Context):
         """Adds the Unsafe role to the caller.
         It allows access to the #unsafe channel.
+
+        By allowing yourself to the unsafe channel, you hereby agree that
+        you accept any kind of talks and consequences that happen in that
+        channel. If you'd like to have your access to the unsafe channel
+        revoked, please message a moderator.
         """
 
         self._setup_commands(ctx)
