@@ -61,13 +61,16 @@ class RustBot(commands.Bot):
         else:
             self.log.info("Emoji rustOk not loaded! D:")
 
-        self.rustacean_role = discord.utils.get(
-            ctx.guild.roles, id=319_953_207_193_501_696
-        )
-        if self.rustacean_role:
-            self.log.info("Rustacean role loaded!")
+        rust_guild = await self.fetch_guild(273534239310479360)
+        if rust_guild:
+            self.log.info("Fetched Rust guild, fetching Rustacean role...")
+            self.rustacean_role = rust_guild.get_role(319_953_207_193_501_696)
+            if self.rustacean_role:
+                self.log.info("Rustacean role loaded!")
+            else:
+                self.log.info("Rustacean role not loaded! D:")
         else:
-            self.log.info("Rustacean role not loaded! D:")
+            self.log.info("Failed to fetch Rust guild")
 
     async def on_command(self, ctx):
         if isinstance(ctx.channel, discord.abc.PrivateChannel):
