@@ -39,6 +39,7 @@ class RustBot(commands.Bot):
             "bot.cogs.owner",
             "bot.cogs.playground",
         ]
+        self.rust_guild = None
         self.emoji_rustok = None
         self.rustacean_role = None
         self.log = setup_logging()
@@ -61,10 +62,10 @@ class RustBot(commands.Bot):
         else:
             self.log.info("Emoji rustOk not loaded! D:")
 
-        rust_guild = await self.fetch_guild(273534239310479360)
-        if rust_guild:
+        self.rust_guild = await self.fetch_guild(273534239310479360)
+        if self.rust_guild:
             self.log.info("Fetched Rust guild, fetching Rustacean role...")
-            self.rustacean_role = rust_guild.get_role(319_953_207_193_501_696)
+            self.rustacean_role = self.rust_guild.get_role(319_953_207_193_501_696)
             if self.rustacean_role:
                 self.log.info("Rustacean role loaded!")
             else:
@@ -89,9 +90,10 @@ class RustBot(commands.Bot):
             await ctx.send(f"You aren't allowed to run this command!")
 
     async def on_member_join(self, member: discord.Member):
-        await member.add_roles(
-            self.rustacean_role, reason=f"You have been automatically rusted! owo"
-        )
+        if member.guild == self.rust_guild:
+            await member.add_roles(
+                self.rustacean_role, reason=f"You have been automatically rusted! owo"
+            )
 
 
 def main():
