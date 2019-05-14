@@ -99,13 +99,12 @@ class Meta:
         await ctx.message.add_reaction(self.bot.emoji_rustok)
 
     @commands.command()
-    async def cleanup(self, ctx: commands.Context, limit=100):
+    async def cleanup(self, ctx: commands.Context, limit=None):
         """Deletes the bot's messages for cleanup.
         You can specify how many messages to look for.
         """
 
-        if limit > 100:
-            limit = 100
+        limit = limit or 100
 
         def is_me(m):
             return m.author.id == self.bot.user.id
