@@ -76,9 +76,6 @@ class Meta(commands.Cog):
 
         self._setup_commands(ctx)
 
-        if self.rustacean_role not in ctx.author.roles:
-            return await ctx.message.add_reaction("❌")
-
         if ctx.channel.id != 273_541_645_579_059_201:
             await ctx.message.add_reaction("❌")
             return await ctx.send(
