@@ -71,7 +71,7 @@ class Meta(commands.Cog):
         By allowing yourself to the unsafe channel, you hereby agree that
         you accept any kind of talks and consequences that happen in that
         channel. If you'd like to have your access to the unsafe channel
-        revoked, please message a moderator.
+        revoked, please use the ?safe command.
         """
 
         self._setup_commands(ctx)
@@ -83,6 +83,27 @@ class Meta(commands.Cog):
             )
 
         await ctx.author.add_roles(
+            self.unsafe_role, reason=f"You have been unsafed! owo"
+        )
+
+        await ctx.message.add_reaction(self.bot.emoji_rustok)
+
+    @commands.command()
+    @commands.guild_only()
+    async def safe(self, ctx: commands.Context):
+        """Removes the Unsafe role to the caller.
+        It disallows access to the #unsafe channel.
+        """
+
+        self._setup_commands(ctx)
+
+        if ctx.channel.id != 273_541_645_579_059_201:
+            await ctx.message.add_reaction("❌")
+            return await ctx.send(
+                "Why are you not running this command over on <#273541645579059201>?"
+            )
+
+        await ctx.author.remove_roles(
             self.unsafe_role, reason=f"You have been unsafed! owo"
         )
 

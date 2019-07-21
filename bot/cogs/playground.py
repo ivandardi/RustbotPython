@@ -61,19 +61,19 @@ class Playground(commands.Cog):
 
     @commands.command()
     async def play(self, ctx: commands.Context, *, arg):
-        """Evaluates Rust code. Exactly equal to https://play.integer32.com/"""
+        """Evaluates Rust code. Exactly equal to https://play.rust-lang.org/"""
         (mode, code) = self.parse_args(arg)
         await self.query_playground(ctx, mode, code.source)
 
     @commands.command()
     async def playwarn(self, ctx: commands.Context, *, arg):
-        """Evaluates Rust code and outputs generated warnings. Exactly equal to https://play.integer32.com/"""
+        """Evaluates Rust code and outputs generated warnings. Exactly equal to https://play.rust-lang.org/"""
         (mode, code) = self.parse_args(arg)
         await self.query_playground(ctx, mode, code.source, warnings=True)
 
     @commands.command()
     async def eval(self, ctx: commands.Context, *, arg):
-        """Evaluates Rust code and debug prints the results. Exactly equal to https://play.integer32.com/"""
+        """Evaluates Rust code and debug prints the results. Exactly equal to https://play.rust-lang.org/"""
         (mode, code) = self.parse_args(arg)
         comment_index = code.source.find("//")
         end_idx = comment_index if comment_index != -1 else len(code.source)
@@ -103,14 +103,14 @@ class Playground(commands.Cog):
             return None, CodeSection(code)
 
     async def query_playground(
-        self, ctx: commands.Context, mode, source, warnings=None
+        self, ctx: commands.Context, mode, code, warnings: bool = False
     ):
         async with ctx.typing():
             payload = json.dumps(
                 {
                     "channel": "nightly",
                     "edition": "2018",
-                    "code": source,
+                    "code": code,
                     "crateType": "bin",
                     "mode": mode if mode is not None else "debug",
                     "tests": False,
@@ -118,11 +118,11 @@ class Playground(commands.Cog):
             )
 
             async with self.session.post(
-                "https://play.integer32.com/execute", data=payload
+                "https://play.rust-lang.org/execute", data=payload
             ) as r:
                 if r.status != 200:
                     raise commands.CommandError(
-                        "Rust i32 Playground didn't respond in time."
+                        "Rust Playground didn't respond in time. :("
                     )
 
                 response = await r.json()
@@ -135,7 +135,7 @@ class Playground(commands.Cog):
                 full_response = (
                     stdout
                     if err_regex.search(stderr) is None
-                    and not (warnings is not None and len(stderr) >= 4)
+                    and not (warnings and len(stderr) >= 4)
                     and "panicked" not in stderr
                     else "\n".join(stderr.split("\n")[1:]) + "\n\n" + stdout
                 )
@@ -145,24 +145,25 @@ class Playground(commands.Cog):
                 elif len_response < 1990:
                     full_response = full_response.replace("```", "  ̀  ̀  ̀")
                     msg = f"```rs\n{full_response}```"
-                elif 1990 <= len_response <= 5000:
-                    msg = await self.get_gist(full_response)
                 else:
-                    raise commands.CommandError("Output too big!")
+                    msg = await self.get_playground_link(code)
 
                 await ctx.send(msg)
 
-    async def get_gist(self, msg):
-        data = json.dumps({"public": True, "files": {"main.rs": {"content": msg}}})
+    async def get_playground_link(self, code):
+        headers = {
+            "Content-Type": "application/json",
+            "Referer": "https://discord.gg/aVESxV8",
+        }
 
-        headers = {"Accept": "application/vnd.github.v3+json"}
+        data = json.dumps({"code": code})
 
         async with self.session.post(
-            "https://api.github.com/gists", data=data, headers=headers
+            "https://play.rust-lang.org/meta/gist/", data=data, headers=headers
         ) as r:
             response = await r.json()
 
-        return "https://gist.github.com/anonymous/" + response["id"]
+        return "https://play.rust-lang.org/?version=nightly&mode=debug&edition=2018&gist=" + response["id"]
 
     async def cog_command_error(self, ctx: commands.Context, error):
         log.error("Playground error: %s", error)
