@@ -1,6 +1,7 @@
 # Misc
 .*/
 *.sqlite3
+*.json
 logs/
 discord/
 

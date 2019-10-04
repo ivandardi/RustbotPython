@@ -38,6 +38,7 @@ class RustBot(commands.Bot):
             "bot.cogs.meta",
             "bot.cogs.owner",
             "bot.cogs.playground",
+            "bot.cogs.feeds",
         ]
         self.rust_guild = None
         self.emoji_rustok = None
