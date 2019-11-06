@@ -1,11 +1,13 @@
 import discord
 from discord.ext import commands
 
+from bot import RustBot
+
 
 class Owner(commands.Cog):
     """Admin-only commands that make the bot dynamic."""
 
-    def __init__(self, bot):
+    def __init__(self, bot: RustBot):
         self.bot = bot
 
     @commands.command()
@@ -29,11 +31,11 @@ class Owner(commands.Cog):
             self.bot.unload_extension(ext)
             self.bot.load_extension(ext)
         else:
-            for m in self.bot.initial_extensions:
+            for m in self.bot.custom_extensions:
                 self.bot.unload_extension(m)
                 self.bot.load_extension(m)
 
-        await ctx.message.add_reaction(self.bot.emoji_rustok)
+        await ctx.message.add_reaction(self.bot.emoji.ok)
 
 
 def setup(bot):

@@ -1,9 +1,8 @@
 # Misc
 .*/
-*.sqlite3
-*.json
+database/
 logs/
-discord/
+*.sqlite3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

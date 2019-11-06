@@ -1,0 +1,32 @@
+{
+  "extensions": [
+    "bot.cogs.feeds",
+    "bot.cogs.meta",
+    "bot.cogs.owner",
+    "bot.cogs.playground",
+    "bot.cogs.votes"
+  ],
+  "prefixes": [
+    "?",
+    "🦀 ",
+    "🦀",
+    "hey ferris can you please ",
+    "hey ferris, can you please ",
+    "hey fewwis can you please ",
+    "hey fewwis, can you please ",
+    "hey ferris can you ",
+    "hey ferris, can you ",
+    "hey fewwis can you ",
+    "hey fewwis, can you "
+  ],
+  "guild_id": 273534239310479360,
+  "council_channel_id": 588447667038978068,
+  "emojis": {
+    "ok": "rustOk"
+  },
+  "roles": {
+    "rustacean": 319953207193501696,
+    "council": 585200700024422431
+  },
+  "feeds_database": "database/feeds.json"
+}

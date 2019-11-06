@@ -103,7 +103,7 @@ class Playground(commands.Cog):
             return None, CodeSection(code)
 
     async def query_playground(
-        self, ctx: commands.Context, mode, code, warnings: bool = False
+            self, ctx: commands.Context, mode, code, warnings: bool = False
     ):
         async with ctx.typing():
             payload = json.dumps(
@@ -118,7 +118,7 @@ class Playground(commands.Cog):
             )
 
             async with self.session.post(
-                "https://play.rust-lang.org/execute", data=payload
+                    "https://play.rust-lang.org/execute", data=payload
             ) as r:
                 if r.status != 200:
                     raise commands.CommandError(
@@ -135,8 +135,8 @@ class Playground(commands.Cog):
                 full_response = (
                     stdout
                     if err_regex.search(stderr) is None
-                    and not (warnings and len(stderr) >= 4)
-                    and "panicked" not in stderr
+                       and not (warnings and len(stderr) >= 4)
+                       and "panicked" not in stderr
                     else "\n".join(stderr.split("\n")[1:]) + "\n\n" + stdout
                 )
                 len_response = len(full_response)
@@ -159,7 +159,7 @@ class Playground(commands.Cog):
         data = json.dumps({"code": code})
 
         async with self.session.post(
-            "https://play.rust-lang.org/meta/gist/", data=data, headers=headers
+                "https://play.rust-lang.org/meta/gist/", data=data, headers=headers
         ) as r:
             response = await r.json()
 

@@ -3,17 +3,12 @@ import datetime
 import discord
 from discord.ext import commands
 
+from bot import RustBot
+
 
 class Meta(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: RustBot):
         self.bot = bot
-        self.unsafe_role = None
-
-    def _setup_commands(self, ctx):
-        if not self.unsafe_role:
-            self.unsafe_role = discord.utils.get(
-                ctx.guild.roles, id=468_114_715_210_678_272
-            )
 
     @commands.command()
     async def uptime(self, ctx: commands.Context):
@@ -56,58 +51,11 @@ class Meta(commands.Cog):
 
         for member in members:
             await member.add_roles(
-                self.bot.rustacean_role,
+                self.bot.role.rustacean,
                 reason=f"You have been rusted by {ctx.author}! owo",
             )
 
-        await ctx.message.add_reaction(self.bot.emoji_rustok)
-
-    @commands.command()
-    @commands.guild_only()
-    async def unsafe(self, ctx: commands.Context):
-        """Adds the Unsafe role to the caller.
-        It allows access to the #unsafe channel.
-
-        By allowing yourself to the unsafe channel, you hereby agree that
-        you accept any kind of talks and consequences that happen in that
-        channel. If you'd like to have your access to the unsafe channel
-        revoked, please use the ?safe command.
-        """
-
-        self._setup_commands(ctx)
-
-        if ctx.channel.id != 273_541_645_579_059_201:
-            await ctx.message.add_reaction("❌")
-            return await ctx.send(
-                "Why are you not running this command over on <#273541645579059201>?"
-            )
-
-        await ctx.author.add_roles(
-            self.unsafe_role, reason=f"You have been unsafed! owo"
-        )
-
-        await ctx.message.add_reaction(self.bot.emoji_rustok)
-
-    @commands.command()
-    @commands.guild_only()
-    async def safe(self, ctx: commands.Context):
-        """Removes the Unsafe role to the caller.
-        It disallows access to the #unsafe channel.
-        """
-
-        self._setup_commands(ctx)
-
-        if ctx.channel.id != 273_541_645_579_059_201:
-            await ctx.message.add_reaction("❌")
-            return await ctx.send(
-                "Why are you not running this command over on <#273541645579059201>?"
-            )
-
-        await ctx.author.remove_roles(
-            self.unsafe_role, reason=f"You have been unsafed! owo"
-        )
-
-        await ctx.message.add_reaction(self.bot.emoji_rustok)
+        await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=None):
@@ -122,7 +70,7 @@ class Meta(commands.Cog):
 
         deleted = await ctx.channel.purge(limit=limit, check=is_me)
         await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
-        await ctx.message.add_reaction(self.bot.emoji_rustok)
+        await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @commands.command()
     async def source(self, ctx: commands.Context):
