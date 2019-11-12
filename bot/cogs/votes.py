@@ -18,12 +18,13 @@ class Votes(commands.Cog):
         if not is_in_voting_channel:
             return
 
-        channel = self.bot.get_channel(payload.channel_id)
-        is_council_member = channel.guild.get_role(self.bot.role.council)
+        guild = self.bot.get_guild(payload.guild_id)
+        member = guild.get_member(payload.user_id)
+        is_council_member = discord.utils.get(member.roles, id=self.bot.role.council.id)
         if not is_council_member:
+            channel = guild.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
-            user = await self.bot.fetch_user(payload.user_id)
-            await message.remove_reaction(payload.emoji, user)
+            await message.remove_reaction(payload.emoji, member)
 
 
 def setup(bot):
