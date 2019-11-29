@@ -47,8 +47,6 @@ class Meta(commands.Cog):
         Takes in a space-separated list of member mentions and/or IDs.
         """
 
-        self._setup_commands(ctx)
-
         for member in members:
             await member.add_roles(
                 self.bot.role.rustacean,
