@@ -115,6 +115,10 @@ class Playground(commands.Cog):
 
             await self.edit_playground(ctx, sent_eval, mode, code.source, warnings)
 
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        self.sent_evals.pop(message.id, None)
+
     def parse_args(self, args):
         args = args.replace("\n`", " `").split(" ")
         if args[0].startswith("--"):
