@@ -95,25 +95,30 @@ class Playground(commands.Cog):
             if not ctx.valid:
                 return
 
-            sent_eval = await ctx.fetch_message(sent_eval_id)
+            try:
+                sent_eval = await ctx.fetch_message(sent_eval_id)
 
-            await ctx.command.prepare(ctx)
+                await ctx.command.prepare(ctx)
 
-            # 'arg' depends on the name of the argument in the commands above; they must all at least be the same, and
-            # if they change, this must be changed too. Messy, but arguments are only provided as a dict.
-            (mode, code) = self.parse_args(ctx.kwargs['arg'])
+                # 'arg' depends on the name of the argument in the commands above; they must all at least be the same,
+                # and if they change, this must be changed too. Messy, but arguments are only provided as a dict.
+                (mode, code) = self.parse_args(ctx.kwargs['arg'])
 
-            warnings = False
-            if ctx.command.name == "eval":
-                comment_index = code.source.find("//")
-                end_idx = comment_index if comment_index != -1 else len(code.source)
-                code.source = 'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
-            elif ctx.command.name == "playwarn":
-                warnings = True
-            elif ctx.command.name != "play":
-                return
+                warnings = False
+                if ctx.command.name == "eval":
+                    comment_index = code.source.find("//")
+                    end_idx = comment_index if comment_index != -1 else len(code.source)
+                    code.source = 'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
+                elif ctx.command.name == "playwarn":
+                    warnings = True
+                elif ctx.command.name != "play":
+                    return
 
-            await self.edit_playground(ctx, sent_eval, mode, code.source, warnings)
+                await self.edit_playground(ctx, sent_eval, mode, code.source, warnings)
+            except (
+                    discord.HTTPException, discord.Forbidden, commands.MissingRequiredArgument, commands.CommandError
+            ) as e:
+                await self.cog_command_error(ctx, e)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -191,7 +196,6 @@ class Playground(commands.Cog):
                 msg = await self.get_playground_link(code)
 
             return msg
-
 
     async def get_playground_link(self, code):
         headers = {
