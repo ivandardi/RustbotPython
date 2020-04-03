@@ -6,7 +6,7 @@ from discord.ext import commands
 from bot import RustBot
 
 
-class Meta(commands.Cog):
+class Commands(commands.Cog):
     def __init__(self, bot: RustBot):
         self.bot = bot
 
@@ -76,10 +76,16 @@ class Meta(commands.Cog):
 
         await ctx.send("https://github.com/ivandardi/RustbotPython")
 
+    @commands.command()
+    async def ban(self, ctx: commands.Context, member: discord.Member):
+        """Bans another person."""
+        await ctx.send(f"{ctx.author} banned user {member.mention}  <:ferrisBanne:419884768256327680>")
+        await ctx.message.add_reaction(self.bot.emoji.ok)
+
     async def cog_command_error(self, ctx: commands.Context, error):
         await ctx.message.clear_reactions()
         await ctx.message.add_reaction("❌")
 
 
 def setup(bot):
-    bot.add_cog(Meta(bot))
+    bot.add_cog(Commands(bot))
