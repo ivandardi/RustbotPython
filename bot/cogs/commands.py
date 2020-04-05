@@ -79,7 +79,7 @@ class Commands(commands.Cog):
     @commands.command()
     async def ban(self, ctx: commands.Context, member: discord.Member):
         """Bans another person."""
-        await ctx.send(f"{ctx.author} banned user {member.mention}  <:ferrisBanne:419884768256327680>")
+        await ctx.send(f"{ctx.author} banned user {member}  <:ferrisBanne:419884768256327680>")
         await ctx.message.add_reaction(self.bot.emoji.ok)
 
     async def cog_command_error(self, ctx: commands.Context, error):
