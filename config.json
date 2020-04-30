@@ -3,6 +3,7 @@
     "bot.cogs.commands",
     "bot.cogs.feeds",
     "bot.cogs.owner",
+    "bot.cogs.pin",
     "bot.cogs.playground"
   ],
   "prefixes": [
@@ -25,5 +26,8 @@
   "roles": {
     "rustacean": 319953207193501696
   },
-  "feeds_database": "database/feeds.json"
+  "databases": {
+    "feeds": "database/feeds.json",
+    "pins": "database/pins.json"
+  }
 }

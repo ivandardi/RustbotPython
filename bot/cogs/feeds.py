@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from tinydb import where, TinyDB, JSONStorage
+from tinydb import where, TinyDB
 
 from bot import RustBot
 
@@ -15,7 +15,7 @@ class Feeds(commands.Cog):
 
     def __init__(self, bot: RustBot):
         self.bot = bot
-        self.db = TinyDB(self.bot.config["feeds_database"])
+        self.db = TinyDB(self.bot.config["databases"]["feeds"])
 
     async def get_feeds(self, channel_id):
         feeds = self.db.search(where("channel_id") == channel_id)

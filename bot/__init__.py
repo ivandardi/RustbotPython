@@ -1,6 +1,7 @@
 import datetime
 import logging
 import traceback
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -48,12 +49,14 @@ class RustBot(commands.Bot):
             traceback.format_exception(type(error), error, error.__traceback__)
         )
         log.error(f"Command error in %s:\n%s", ctx.command, tb)
-        if isinstance(error, commands.CheckFailure):
-            await ctx.message.add_reaction("❌")
-            await ctx.send(f"You aren't allowed to run this command!")
+        await ctx.message.add_reaction("❌")
+        if isinstance(error, (commands.CheckFailure, commands.ConversionError)):
+            await ctx.send(str(error))
 
     async def on_member_join(self, member: discord.Member):
         if member.guild == self.guild:
+            # Await half an hour before giving the Rustacean role to newcomers.
+            await asyncio.sleep(1800)
             await member.add_roles(
                 self.role.rustacean, reason=f"You have been automatically rusted! owo"
             )
