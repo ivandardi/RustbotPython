@@ -6,8 +6,8 @@ After=network.target
 EnvironmentFile=/home/melo/env
 Type=simple
 User=melo
-ExecStart=/home/melo/prod/venv/bin/python3 runner.py
-WorkingDirectory=/home/melo/prod
+ExecStart=/home/melo/RustbotPython/venv/bin/python3 runner.py
+WorkingDirectory=/home/melo/RustbotPython
 Restart=always
 RestartSec=600
 

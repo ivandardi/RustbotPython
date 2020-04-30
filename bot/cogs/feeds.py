@@ -5,20 +5,32 @@ from tinydb import where, TinyDB
 from bot import RustBot
 
 
+@commands.check
+def is_in_feeds_whitelist(ctx: commands.Context):
+    if ctx.guild is None:
+        return False
+
+    cog = ctx.bot.get_cog('Feeds')
+
+    member_is_in_whitelist = cog.db.table("whitelist").search(
+        (where("channel_id") == ctx.channel.id) & (where("member_id") == ctx.author.id))
+
+    if not member_is_in_whitelist:
+        raise commands.CheckFailure("\N{WARNING SIGN} You're not in the feeds whitelist of this channel.")
+
+    return True
+
+
 class Feeds(commands.Cog):
-    """
-    The feeds are stored in a JSON database with the fields:
-     * name
-     * role_id
-     * channel_id
-    """
+    """A feed is a role that people can subscribe to and get pinged whenever someone publishes something to that
+    feed. """
 
     def __init__(self, bot: RustBot):
         self.bot = bot
         self.db = TinyDB(self.bot.config["databases"]["feeds"])
 
     async def get_feeds(self, channel_id):
-        feeds = self.db.search(where("channel_id") == channel_id)
+        feeds = self.db.table("feeds").search(where("channel_id") == channel_id)
         return {f["name"]: f["role_id"] for f in feeds}
 
     @commands.group(name="feeds", aliases=["feed"], invoke_without_command=True)
@@ -39,13 +51,42 @@ class Feeds(commands.Cog):
         names = "\n".join(f"- {r}" for r in feeds)
         await ctx.send(f"Found {len(feeds)} feeds.\n{names}")
 
+    @_feeds.group(name="whitelist", invoke_without_command=True)
+    async def _feeds_whitelist(self, ctx: commands.Context):
+        """Shows a list of the current feeds whitelist of this channel."""
+        whitelist = self.db.table("whitelist").search(where("channel_id") == ctx.channel.id)
+
+        if not whitelist:
+            return await ctx.send("It appears that this channel's feeds whitelist is empty!")
+
+        feeds_whitelist = []
+        for row in whitelist:
+            member = ctx.guild.get_member(row["member_id"])
+            if member:
+                feeds_whitelist.append(str(member))
+        feeds_whitelist = "\n".join(feeds_whitelist)
+
+        await ctx.send(f"People who can publish in a feed in this channel:\n{feeds_whitelist}")
+
+    @_feeds_whitelist.command(name="add")
+    async def feeds_whitelist_add(self, ctx: commands.Context, member: discord.Member):
+        """Adds a person to the feeds whitelist of the current channel."""
+        self.db.table("whitelist").insert({
+            "channel_id": ctx.channel.id,
+            "member_id": member.id,
+        })
+        await ctx.message.add_reaction(self.bot.emoji.ok)
+
+    @_feeds_whitelist.command(name="remove", aliases=["del", "delete", "rm"])
+    async def feeds_whitelist_remove(self, ctx, member: discord.Member):
+        """Removes a person from the feeds whitelist of the current channel."""
+        self.db.table("whitelist").remove((where("channel_id") == ctx.channel.id) & (where("member_id") == member.id))
+        await ctx.message.add_reaction(self.bot.emoji.ok)
+
     @_feeds.command(name="create")
-    @commands.has_permissions(manage_roles=True)
-    @commands.guild_only()
+    @commands.check_any(commands.has_permissions(manage_roles=True), is_in_feeds_whitelist)
     async def feeds_create(self, ctx, *, name: str):
-        """Creates a feed with the specified name.
-        You need Manage Roles permissions to create a feed.
-        """
+        """Creates a feed with the specified name."""
 
         name = name.lower()
 
@@ -54,7 +95,7 @@ class Feeds(commands.Cog):
 
         exists = [
             f["role_id"]
-            for f in self.db.search(
+            for f in self.db.table("feeds").search(
                 (where("channel_id") == ctx.channel.id) & (where("name") == name)
             )
         ]
@@ -62,15 +103,14 @@ class Feeds(commands.Cog):
             return await ctx.send("This feed already exists.")
 
         role = await ctx.guild.create_role(
-            name=name, permissions=discord.Permissions.none()
+            name=name + " feed", permissions=discord.Permissions.none()
         )
-        self.db.insert({"name": name, "role_id": role.id, "channel_id": ctx.channel.id})
+        self.db.table("feeds").insert({"name": name, "role_id": role.id, "channel_id": ctx.channel.id})
 
-        await ctx.send(f"Successfully created feed.")
+        await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @_feeds.command(name="delete", aliases=["remove"])
-    @commands.has_permissions(manage_roles=True)
-    @commands.guild_only()
+    @commands.check_any(commands.has_permissions(manage_roles=True), is_in_feeds_whitelist)
     async def feeds_delete(self, ctx, *, feed: str):
         """Removes a feed from the channel.
         This will also delete the associated role so this
@@ -78,13 +118,12 @@ class Feeds(commands.Cog):
         """
 
         query = (where("channel_id") == ctx.channel.id) & (where("name") == feed)
-
-        records = self.db.search(query)
+        records = self.db.table("feeds").search(query)
 
         if len(records) == 0:
             return await ctx.send("This feed does not exist.")
 
-        self.db.remove(query)
+        self.db.table("feeds").remove(query)
 
         for record in records:
             role = discord.utils.find(
@@ -96,7 +135,7 @@ class Feeds(commands.Cog):
                 except discord.HTTPException:
                     continue
 
-        await ctx.send(f"Removed feed.")
+        await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @commands.command()
     @commands.guild_only()
@@ -106,6 +145,7 @@ class Feeds(commands.Cog):
         owner. To unsubscribe, see the `unsub` command.
         """
         await self.do_subscription(ctx, feed, ctx.author.add_roles)
+        await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @commands.command()
     @commands.guild_only()
@@ -116,6 +156,7 @@ class Feeds(commands.Cog):
         using the `sub` command.
         """
         await self.do_subscription(ctx, feed, ctx.author.remove_roles)
+        await ctx.message.add_reaction(self.bot.emoji.ok)
 
     async def do_subscription(self, ctx, feed, action):
         feeds = await self.get_feeds(ctx.channel.id)
@@ -131,12 +172,12 @@ class Feeds(commands.Cog):
         role = discord.utils.find(lambda r: r.id == role_id, ctx.guild.roles)
         if role is not None:
             await action(role)
-            await ctx.message.add_reaction(self.bot.emoji_rustok)
+            await ctx.message.add_reaction(self.bot.emoji.ok)
         else:
             await ctx.message.add_reaction("❌")
 
     @commands.command()
-    @commands.has_permissions(manage_roles=True)
+    @commands.check_any(commands.has_permissions(manage_roles=True), is_in_feeds_whitelist)
     @commands.guild_only()
     async def publish(self, ctx, feed: str, *, content: str):
         """Publishes content to a feed.

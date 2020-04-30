@@ -3,7 +3,7 @@
     "bot.cogs.commands",
     "bot.cogs.feeds",
     "bot.cogs.owner",
-    "bot.cogs.pin",
+    "bot.cogs.pins",
     "bot.cogs.playground"
   ],
   "prefixes": [
