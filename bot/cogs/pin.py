@@ -88,7 +88,7 @@ class Pin(commands.Cog):
     @pin.command(name="list", aliases=["ls"])
     async def pin_list(self, ctx: commands.Context):
         """Shows a list of the current pin whitelist of this channel."""
-        whitelist = self.db.search(where("channel_id"))
+        whitelist = self.db.search(where("channel_id") == ctx.channel.id)
 
         if not whitelist:
             return await ctx.send("It appears that this channel's pin whitelist is empty!")
