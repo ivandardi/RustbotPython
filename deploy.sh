@@ -3,7 +3,7 @@ set -eu
 
 echo "Fetching origin repository"
 git fetch --all
-git reset --mixed origin/master
+git reset --hard origin/master
 
 dt=`date '+%Y-%m-%dT%H-%M-%S'`
 echo "Making database and logs backup ${dt}.tar.xz"
