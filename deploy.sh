@@ -6,8 +6,8 @@ git fetch --all
 git reset --mixed origin/master
 
 dt=`date '+%Y-%m-%dT%H-%M-%S'`
-echo "Making database backup ${dt}.tar.xz"
-tar -cJvf "../backup/${dt}.tar.xz" database
+echo "Making database and logs backup ${dt}.tar.xz"
+tar -cJvf "../backup/${dt}.tar.xz" database logging.log
 
 echo "Installing Python dependencies"
 mkdir -p database
