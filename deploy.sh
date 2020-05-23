@@ -6,7 +6,7 @@ git reset --mixed origin/master
 
 repo_dir="$(dirname "$0")"
 
-mkdir database
+mkdir -p database
 rm -rf venv
 python3 -m venv venv
 source venv/bin/activate
