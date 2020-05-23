@@ -102,13 +102,15 @@ class Playground(commands.Cog):
 
                 # 'arg' depends on the name of the argument in the commands above; they must all at least be the same,
                 # and if they change, this must be changed too. Messy, but arguments are only provided as a dict.
-                (mode, code) = self.parse_args(ctx.kwargs['arg'])
+                (mode, code) = self.parse_args(ctx.kwargs["arg"])
 
                 warnings = False
                 if ctx.command.name == "eval":
                     comment_index = code.source.find("//")
                     end_idx = comment_index if comment_index != -1 else len(code.source)
-                    code.source = 'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
+                    code.source = (
+                        'fn main(){println!("{:?}",{' + code.source[:end_idx] + "});}"
+                    )
                 elif ctx.command.name == "playwarn":
                     warnings = True
                 elif ctx.command.name != "play":
@@ -116,7 +118,10 @@ class Playground(commands.Cog):
 
                 await self.edit_playground(ctx, sent_eval, mode, code.source, warnings)
             except (
-                    discord.HTTPException, discord.Forbidden, commands.MissingRequiredArgument, commands.CommandError
+                discord.HTTPException,
+                discord.Forbidden,
+                commands.MissingRequiredArgument,
+                commands.CommandError,
             ) as e:
                 await self.cog_command_error(ctx, e)
 
@@ -140,19 +145,25 @@ class Playground(commands.Cog):
             code = " ".join(args[0:])
             return None, CodeSection(code)
 
-    async def edit_playground(self, ctx: commands.Context, sent_message, mode, code, warnings: bool = False):
+    async def edit_playground(
+        self, ctx: commands.Context, sent_message, mode, code, warnings: bool = False
+    ):
         async with ctx.typing():
-            await sent_message.edit(content=await self.query_playground(mode, code, warnings))
+            await sent_message.edit(
+                content=await self.query_playground(mode, code, warnings)
+            )
 
-    async def send_playground(self, ctx: commands.Context, mode, code, warnings: bool = False):
+    async def send_playground(
+        self, ctx: commands.Context, mode, code, warnings: bool = False
+    ):
         async with ctx.typing():
-            sent_message = await ctx.send(await self.query_playground(mode, code, warnings))
+            sent_message = await ctx.send(
+                await self.query_playground(mode, code, warnings)
+            )
 
         self.sent_evals[ctx.message.id] = sent_message.id
 
-    async def query_playground(
-            self, mode, code, warnings: bool = False
-    ):
+    async def query_playground(self, mode, code, warnings: bool = False):
         payload = json.dumps(
             {
                 "channel": "nightly",
@@ -165,7 +176,7 @@ class Playground(commands.Cog):
         )
 
         async with self.session.post(
-                "https://play.rust-lang.org/execute", data=payload
+            "https://play.rust-lang.org/execute", data=payload
         ) as r:
             if r.status != 200:
                 raise commands.CommandError(
@@ -182,8 +193,8 @@ class Playground(commands.Cog):
             full_response = (
                 stdout
                 if err_regex.search(stderr) is None
-                   and not (warnings and len(stderr) >= 4)
-                   and "panicked" not in stderr
+                and not (warnings and len(stderr) >= 4)
+                and "panicked" not in stderr
                 else "\n".join(stderr.split("\n")[1:]) + "\n\n" + stdout
             )
             len_response = len(full_response)
@@ -206,11 +217,14 @@ class Playground(commands.Cog):
         data = json.dumps({"code": code})
 
         async with self.session.post(
-                "https://play.rust-lang.org/meta/gist/", data=data, headers=headers
+            "https://play.rust-lang.org/meta/gist/", data=data, headers=headers
         ) as r:
             response = await r.json()
 
-        return "https://play.rust-lang.org/?version=nightly&mode=debug&edition=2018&gist=" + response["id"]
+        return (
+            "https://play.rust-lang.org/?version=nightly&mode=debug&edition=2018&gist="
+            + response["id"]
+        )
 
     async def cog_command_error(self, ctx: commands.Context, error):
         log.error("Playground error: %s", error)

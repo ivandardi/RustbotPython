@@ -26,7 +26,12 @@ class RustBot(commands.Bot):
             try:
                 self.load_extension(extension)
             except Exception as e:  # noqa
-                log.error("Failed to load extension %s\n%s: %s", extension, type(e).__name__, e)
+                log.error(
+                    "Failed to load extension %s\n%s: %s",
+                    extension,
+                    type(e).__name__,
+                    e,
+                )
 
     async def on_ready(self):
         log.info("Logged in as %s", self.user)
@@ -49,8 +54,8 @@ class RustBot(commands.Bot):
             traceback.format_exception(type(error), error, error.__traceback__)
         )
         log.error(f"Command error in %s:\n%s", ctx.command, tb)
-        await ctx.message.add_reaction("❌")
         if isinstance(error, (commands.CheckFailure, commands.ConversionError)):
+            await ctx.message.add_reaction("❌")
             await ctx.send(str(error))
 
     async def on_member_join(self, member: discord.Member):

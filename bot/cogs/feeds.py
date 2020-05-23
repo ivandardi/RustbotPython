@@ -5,18 +5,20 @@ from tinydb import where, TinyDB
 from bot import RustBot
 
 
-@commands.check
 def is_in_feeds_whitelist(ctx: commands.Context):
     if ctx.guild is None:
         return False
 
-    cog = ctx.bot.get_cog('Feeds')
+    cog = ctx.bot.get_cog("Feeds")
 
     member_is_in_whitelist = cog.db.table("whitelist").search(
-        (where("channel_id") == ctx.channel.id) & (where("member_id") == ctx.author.id))
+        (where("channel_id") == ctx.channel.id) & (where("member_id") == ctx.author.id)
+    )
 
     if not member_is_in_whitelist:
-        raise commands.CheckFailure("\N{WARNING SIGN} You're not in the feeds whitelist of this channel.")
+        raise commands.CheckFailure(
+            "\N{WARNING SIGN} You're not in the feeds whitelist of this channel."
+        )
 
     return True
 
@@ -54,10 +56,14 @@ class Feeds(commands.Cog):
     @_feeds.group(name="whitelist", invoke_without_command=True)
     async def _feeds_whitelist(self, ctx: commands.Context):
         """Shows a list of the current feeds whitelist of this channel."""
-        whitelist = self.db.table("whitelist").search(where("channel_id") == ctx.channel.id)
+        whitelist = self.db.table("whitelist").search(
+            where("channel_id") == ctx.channel.id
+        )
 
         if not whitelist:
-            return await ctx.send("It appears that this channel's feeds whitelist is empty!")
+            return await ctx.send(
+                "It appears that this channel's feeds whitelist is empty!"
+            )
 
         feeds_whitelist = []
         for row in whitelist:
@@ -66,25 +72,30 @@ class Feeds(commands.Cog):
                 feeds_whitelist.append(str(member))
         feeds_whitelist = "\n".join(feeds_whitelist)
 
-        await ctx.send(f"People who can publish in a feed in this channel:\n{feeds_whitelist}")
+        await ctx.send(
+            f"People who can publish in a feed in this channel:\n{feeds_whitelist}"
+        )
 
     @_feeds_whitelist.command(name="add")
     async def feeds_whitelist_add(self, ctx: commands.Context, member: discord.Member):
         """Adds a person to the feeds whitelist of the current channel."""
-        self.db.table("whitelist").insert({
-            "channel_id": ctx.channel.id,
-            "member_id": member.id,
-        })
+        self.db.table("whitelist").insert(
+            {"channel_id": ctx.channel.id, "member_id": member.id,}
+        )
         await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @_feeds_whitelist.command(name="remove", aliases=["del", "delete", "rm"])
     async def feeds_whitelist_remove(self, ctx, member: discord.Member):
         """Removes a person from the feeds whitelist of the current channel."""
-        self.db.table("whitelist").remove((where("channel_id") == ctx.channel.id) & (where("member_id") == member.id))
+        self.db.table("whitelist").remove(
+            (where("channel_id") == ctx.channel.id) & (where("member_id") == member.id)
+        )
         await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @_feeds.command(name="create")
-    @commands.check_any(commands.has_permissions(manage_roles=True), is_in_feeds_whitelist)
+    @commands.check_any(
+        commands.has_permissions(manage_roles=True), is_in_feeds_whitelist
+    )
     async def feeds_create(self, ctx, *, name: str):
         """Creates a feed with the specified name."""
 
@@ -105,12 +116,16 @@ class Feeds(commands.Cog):
         role = await ctx.guild.create_role(
             name=name + " feed", permissions=discord.Permissions.none()
         )
-        self.db.table("feeds").insert({"name": name, "role_id": role.id, "channel_id": ctx.channel.id})
+        self.db.table("feeds").insert(
+            {"name": name, "role_id": role.id, "channel_id": ctx.channel.id}
+        )
 
         await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @_feeds.command(name="delete", aliases=["remove"])
-    @commands.check_any(commands.has_permissions(manage_roles=True), is_in_feeds_whitelist)
+    @commands.check_any(
+        commands.has_permissions(manage_roles=True), is_in_feeds_whitelist
+    )
     async def feeds_delete(self, ctx, *, feed: str):
         """Removes a feed from the channel.
         This will also delete the associated role so this
@@ -177,7 +192,9 @@ class Feeds(commands.Cog):
             await ctx.message.add_reaction("❌")
 
     @commands.command()
-    @commands.check_any(commands.has_permissions(manage_roles=True), is_in_feeds_whitelist)
+    @commands.check_any(
+        commands.has_permissions(manage_roles=True), is_in_feeds_whitelist
+    )
     @commands.guild_only()
     async def publish(self, ctx, feed: str, *, content: str):
         """Publishes content to a feed.
