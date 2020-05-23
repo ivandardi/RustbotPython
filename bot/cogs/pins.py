@@ -1,12 +1,8 @@
-import logging
-
 import discord
 from discord.ext import commands
 from tinydb import TinyDB, where
 
 from bot import RustBot
-
-log = logging.getLogger(__name__)
 
 
 def MessageID(argument):
