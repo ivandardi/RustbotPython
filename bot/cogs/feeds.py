@@ -94,7 +94,7 @@ class Feeds(commands.Cog):
 
     @_feeds.command(name="create")
     @commands.check_any(
-        commands.has_permissions(manage_roles=True), is_in_feeds_whitelist
+        commands.has_permissions(manage_roles=True), commands.check(is_in_feeds_whitelist)
     )
     async def feeds_create(self, ctx, *, name: str):
         """Creates a feed with the specified name."""
@@ -124,7 +124,7 @@ class Feeds(commands.Cog):
 
     @_feeds.command(name="delete", aliases=["remove"])
     @commands.check_any(
-        commands.has_permissions(manage_roles=True), is_in_feeds_whitelist
+        commands.has_permissions(manage_roles=True), commands.check(is_in_feeds_whitelist)
     )
     async def feeds_delete(self, ctx, *, feed: str):
         """Removes a feed from the channel.
@@ -193,7 +193,7 @@ class Feeds(commands.Cog):
 
     @commands.command()
     @commands.check_any(
-        commands.has_permissions(manage_roles=True), is_in_feeds_whitelist
+        commands.has_permissions(manage_roles=True), commands.check(is_in_feeds_whitelist)
     )
     @commands.guild_only()
     async def publish(self, ctx, feed: str, *, content: str):
