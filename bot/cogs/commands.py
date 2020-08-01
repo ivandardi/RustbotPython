@@ -84,6 +84,10 @@ class Commands(commands.Cog):
         )
         await ctx.message.add_reaction(self.bot.emoji.ok)
 
+    @commands.command()
+    async def banne(self, ctx: commands.Context, member: discord.Member):
+        await self.ban(ctx, member)
+
     async def cog_command_error(self, ctx: commands.Context, error):
         await ctx.message.clear_reactions()
         await ctx.message.add_reaction("❌")
