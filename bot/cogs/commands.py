@@ -76,7 +76,7 @@ class Commands(commands.Cog):
 
         await ctx.send("https://github.com/ivandardi/RustbotPython")
 
-    @commands.command()
+    @commands.command(aliases=["banne"])
     async def ban(self, ctx: commands.Context, member: discord.Member):
         """Bans another person."""
         await ctx.send(
