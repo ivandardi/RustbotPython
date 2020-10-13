@@ -3,6 +3,7 @@ import json
 import logging
 import os
 
+import discord
 from discord.ext import commands
 
 from bot import RustBot
@@ -43,10 +44,14 @@ def main():
     with open(os.environ["CONFIG_FILE"]) as f:
         config = json.load(f)
 
+    intents = discord.Intents.default()
+    intents.members = True
+
     with setup_logging():
         bot = RustBot(
             command_prefix=commands.when_mentioned_or(*config["prefixes"]),
             config=config,
+            intents=intents,
         )
         bot.run(os.environ["DISCORD_TOKEN"])
 

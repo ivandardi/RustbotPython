@@ -1,7 +1,6 @@
 import datetime
 import logging
 import traceback
-import asyncio
 
 import discord
 from discord.ext import commands
@@ -57,11 +56,3 @@ class RustBot(commands.Bot):
         if isinstance(error, (commands.CheckFailure, commands.ConversionError)):
             await ctx.message.add_reaction("❌")
             await ctx.send(str(error))
-
-    async def on_member_join(self, member: discord.Member):
-        if member.guild == self.guild:
-            # Await half an hour before giving the Rustacean role to newcomers.
-            await asyncio.sleep(1800)
-            await member.add_roles(
-                self.role.rustacean, reason=f"You have been automatically rusted! owo"
-            )
