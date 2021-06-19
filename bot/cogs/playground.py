@@ -127,7 +127,11 @@ class Playground(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        self.sent_evals.pop(message.id, None)
+        sent_eval_msg_id = self.sent_evals.pop(message.id, None)
+        
+        if sent_eval_msg_id is not None:
+            sent_eval_msg = await ctx.fetch_message(sent_eval_msg_id)
+            await sent_eval_msg.delete()
 
     def parse_args(self, args):
         args = args.replace("\n`", " `").split(" ")
