@@ -2,11 +2,15 @@
 
 ## How to run
 
-Install the dependencies on `requirements.txt` and then run the command:
+Create a `.env` file like so:
 
-`python3 runner.py`
+```bash
+DISCORD_TOKEN=<token here>
+```
 
-It needs the following environment variables:
+Then run the following commands:
 
-* `DISCORD_TOKEN`: the bot token to use
-* `CONFIG_FILE`: the location of the `config.json` file
+```bash
+ docker build -t rustbotpy -f Containerfile .
+ docker run --rm --name rustbotpy --env-file .env rustbotpy
+```

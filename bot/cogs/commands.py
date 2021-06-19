@@ -24,7 +24,7 @@ class Commands(commands.Cog):
         if days:
             fmt = "{d}d " + fmt
 
-        await ctx.send(
+        await ctx.reply(
             content="Uptime: {}".format(
                 fmt.format(d=days, h=hours, m=minutes, s=seconds)
             )
@@ -38,22 +38,7 @@ class Commands(commands.Cog):
 
         channel = "<#273547351929520129>"
         link = "https://discordapp.com/channels/273534239310479360/273547351929520129/288101969980162049"
-        await ctx.send(f"Invite links are provided in {channel}\n{link}")
-
-    @commands.command(aliases=["wustify"])
-    @commands.guild_only()
-    async def rustify(self, ctx: commands.Context, *members: discord.Member):
-        """Adds the Rustacean role to a member.
-        Takes in a space-separated list of member mentions and/or IDs.
-        """
-
-        for member in members:
-            await member.add_roles(
-                self.bot.role.rustacean,
-                reason=f"You have been rusted by {ctx.author}! owo",
-            )
-
-        await ctx.message.add_reaction(self.bot.emoji.ok)
+        await ctx.reply(f"Invite links are provided in {channel}\n{link}")
 
     @commands.command()
     async def cleanup(self, ctx: commands.Context, limit=None):
@@ -67,20 +52,20 @@ class Commands(commands.Cog):
             return m.author.id == self.bot.user.id
 
         deleted = await ctx.channel.purge(limit=limit, check=is_me)
-        await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
+        await ctx.reply(f"Deleted {len(deleted)} message(s)", delete_after=5)
         await ctx.message.add_reaction(self.bot.emoji.ok)
 
     @commands.command()
     async def source(self, ctx: commands.Context):
         """Links to the bot GitHub repo."""
 
-        await ctx.send("https://github.com/ivandardi/RustbotPython")
+        await ctx.reply("https://github.com/ivandardi/RustbotPython")
 
     @commands.command(aliases=["banne"])
     async def ban(self, ctx: commands.Context, member: discord.Member):
         """Bans another person."""
-        await ctx.send(
-            f"{ctx.author} banned user {member}  <:ferrisBanne:419884768256327680>"
+        await ctx.reply(
+            f"Banned user {member.display_name}  <:ferrisBanne:419884768256327680>"
         )
         await ctx.message.add_reaction(self.bot.emoji.ok)
 

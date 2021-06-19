@@ -1,24 +1,10 @@
 {
   "extensions": [
     "bot.cogs.commands",
-    "bot.cogs.owner",
-    "bot.cogs.pins",
-    "bot.cogs.playground"
+    "bot.cogs.owner"
   ],
   "prefixes": [
-    "?",
-    "🦀 ",
-    "🦀",
-    "<:ferris:358652670585733120> ",
-    "<:ferris:358652670585733120>",
-    "hey ferris can you please ",
-    "hey ferris, can you please ",
-    "hey fewwis can you please ",
-    "hey fewwis, can you please ",
-    "hey ferris can you ",
-    "hey ferris, can you ",
-    "hey fewwis can you ",
-    "hey fewwis, can you "
+    "??"
   ],
   "guild_id": 273534239310479360,
   "emojis": {
@@ -26,9 +12,5 @@
   },
   "roles": {
     "rustacean": 319953207193501696
-  },
-  "databases": {
-    "feeds": "database/feeds.json",
-    "pins": "database/pins.json"
   }
 }

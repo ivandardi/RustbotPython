@@ -41,7 +41,7 @@ def setup_logging():
 
 
 def main():
-    with open(os.environ["CONFIG_FILE"]) as f:
+    with open("config.json") as f:
         config = json.load(f)
 
     intents = discord.Intents.default()
